@@ -1,16 +1,15 @@
-from datetime import datetime, timedelta
 import dateutil.parser
 import json
-import re
-import sys
-import math
-from collections import namedtuple
-import socket
-import functools
 import logging
+import math
+import re
+import socket
+import sys
+from collections import namedtuple
+from datetime import datetime, timedelta
 
-import requests
 import bottle
+import requests
 
 ENTUR_CLIENT_ID = socket.gethostname()
 ENTUR_GRAPHQL_ENDPOINT = "https://api.entur.io/journey-planner/v2/graphql"
@@ -41,12 +40,12 @@ ENTUR_GRAPHQL_QUERY = """
 def norwegian_ascii(s):
     """
     Returns an ASCII string with Norwegian chars replaced with their closest
-    visual character. Other characters ignored and removed.
+    ASCII representation. Other non-ASCII characters are ignored and removed.
     """
     s = re.sub(r"ø", "oe", s, flags=re.IGNORECASE)
     s = re.sub(r"æ", "ae", s, flags=re.IGNORECASE)
     s = re.sub(r"å", "aa", s, flags=re.IGNORECASE)
-    return s
+    return s.encode("ascii", "ignore").decode()
 
 
 def human_delta(until=None, *, since=None):
@@ -61,8 +60,8 @@ def human_delta(until=None, *, since=None):
     if not since:
         since = datetime.now()
     delta = until.timestamp() - since.timestamp()
-    mins = min(delta / 60, 99) # no more than two digits long
-    sign = '<' if mins < 1 else ' '
+    mins  = min(delta / 60, 99) # no more than two digits long
+    sign  = '<' if mins < 1 else ' '
     return "{}{:2} min".format(sign, math.ceil(mins))
 
 
@@ -73,11 +72,9 @@ class Departure(namedtuple("Departure", ["line", "name", "eta", "direction"])):
             self.line, self.name[:10], human_delta(until=self.eta))
 
 
-@functools.lru_cache(maxsize=1)
-def get_realtime_stop(*, stop_id=None, cache_token=None):
+def get_realtime_stop(*, stop_id=None):
     """
     Query EnTur API for realtime stop information.
-    Use a cache_token to memoize calls.
 
     See output format and build your own queries at:
     https://api.entur.io/journey-planner/v2/ide/
@@ -97,40 +94,64 @@ def get_realtime_stop(*, stop_id=None, cache_token=None):
 
 def parse_departures(raw_dict):
     """
-    Parses a response dict from EnTur JourneyPlanner API and
-    returns a list of Departure objects.
+    Parse a JSON response dict from EnTur JourneyPlanner API and
+    return a list of Departure objects.
     """
-    deps = []
     if raw_dict["data"]["stopPlace"]:
         for dep in raw_dict["data"]["stopPlace"]["estimatedCalls"]:
-            deps.append(Departure(
+            yield Departure(
                 line=dep["serviceJourney"]["line"]["publicCode"],
                 name=norwegian_ascii(dep["destinationDisplay"]["frontText"]),
-                eta=dateutil.parser.parse(dep["expectedArrivalTime"]),
-                direction=dep["serviceJourney"]["directionType"]))
-    return deps
+                eta=dateutil.parser.parse(dep["expectedArrivalTime"], ignoretz=True),
+                direction=dep["serviceJourney"]["directionType"]
+            )
 
 
-def get_departures(stop_id, *, directions=None, cache_token=None):
+def get_departures(stop_id, *, directions=None):
     """
-    Get a list of departures for a particular stop. Use a cache token for
-    memoization of the last call to EnTur API.
+    Return a list of departures for a particular stop.
     Use directions param to return items only going in a specific direction.
     """
-    try:
-        raw_stop = get_realtime_stop(stop_id=stop_id, cache_token=cache_token)
-        departures = parse_departures(raw_stop)
-    except requests.exceptions.Timeout as e:
-        logging.error("API call timed out")
-        logging.debug(e)
-        departures = []
+    raw_stop = get_realtime_stop(stop_id=stop_id)
+    departures = parse_departures(raw_stop)
 
+    # Build direction filter list
     if not directions:
         directions = ["inbound", "outbound"]
     elif not isinstance(directions, list):
         directions = [directions]
 
     return [d for d in departures if d.direction in directions]
+
+
+def get_departures_func():
+    """
+    Return a wrapped get_departures function that always returns a list.
+    If an API request fails, it will return a cached version of the last
+    successful request made, Departures with an 'eta' in the past are removed.
+    """
+    cache = []
+    last_call = None
+
+    def wrapped(*args, **kwargs):
+        nonlocal cache
+        nonlocal last_call
+
+        # Remove past departures
+        cache = [d for d in cache if d.eta > datetime.now()]
+
+        # Rate limit upstream API calls
+        if not last_call or datetime.now() > (last_call + timedelta(seconds=30)):
+            try:
+                cache = get_departures(*args, **kwargs)
+            except requests.exceptions.RequestException as e:
+                logging.error(e)
+
+            last_call = datetime.now()
+
+        return cache
+
+    return wrapped
 
 
 if __name__ == "__main__":
@@ -148,7 +169,7 @@ if __name__ == "__main__":
         help="Filter direction of departures")
 
     parser.add_argument('--server', action="store_true",
-        help="Start a HTTP server exposing stop data on '/'")
+        help="Start a HTTP server")
 
     parser.add_argument('--host', type=str, default="0.0.0.0",
         help="HTTP server hostname")
@@ -158,21 +179,21 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # Print out stop information
-    if not args.server:
-        deps = get_departures(args.stop_id, directions=args.direction)
-        for d in deps:
-            print(d)
 
-    # Start HTTP Server
+    cached_get_departures = get_departures_func()
+
     if args.server:
-        # Define main route
+
         @bottle.route("/")
         def index():
-            # This will give a fresh response every minute
-            token = datetime.now().strftime("%Y%m%d%H%M")
-            deps = get_departures(args.stop_id, directions=args.direction, cache_token=token)
+            deps = cached_get_departures(args.stop_id, directions=args.direction)
             return '\n'.join([str(d) for d in deps])
 
         bottle.run(host=args.host, port=args.port)
+
+    # Otherwise print out stop information and exit
+    else:
+        deps = cached_get_departures(args.stop_id, directions=args.direction)
+        for d in deps:
+            print(d)
 
