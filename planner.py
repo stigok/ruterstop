@@ -90,7 +90,7 @@ def get_realtime_stop(*, stop_id=None, cache_token=None):
     }
     q = ENTUR_GRAPHQL_QUERY % dict(stop_id=stop_id)
     data = dict(query=q, variables={})
-    res  = requests.post(ENTUR_GRAPHQL_ENDPOINT, headers=headers, json=data)
+    res  = requests.post(ENTUR_GRAPHQL_ENDPOINT, headers=headers, json=data, timeout=5)
     res.raise_for_status()
     return res.json()
 
@@ -117,8 +117,13 @@ def get_departures(stop_id, *, directions=None, cache_token=None):
     memoization of the last call to EnTur API.
     Use directions param to return items only going in a specific direction.
     """
-    raw_stop = get_realtime_stop(stop_id=stop_id, cache_token=cache_token)
-    departures = parse_departures(raw_stop)
+    try:
+        raw_stop = get_realtime_stop(stop_id=stop_id, cache_token=cache_token)
+        departures = parse_departures(raw_stop)
+    except requests.exceptions.Timeout as e:
+        logging.error("API call timed out")
+        logging.debug(e)
+        departures = []
 
     if not directions:
         directions = ["inbound", "outbound"]
