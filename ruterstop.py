@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import dateutil.parser
 import json
 import logging
