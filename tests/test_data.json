@@ -1,0 +1,140 @@
+{
+  "data": {
+    "stopPlace": {
+      "id": "NSR:StopPlace:6013",
+      "name": "Stig",
+      "estimatedCalls": [
+        {
+          "realtime": true,
+          "expectedArrivalTime": "2019-10-24T12:36:00+0200",
+          "destinationDisplay": {
+            "frontText": "Snarøya"
+          },
+          "serviceJourney": {
+            "directionType": "outbound",
+            "line": {
+              "publicCode": "31"
+            }
+          }
+        },
+        {
+          "realtime": true,
+          "expectedArrivalTime": "2019-10-24T12:36:00+0200",
+          "destinationDisplay": {
+            "frontText": "Majorstuen"
+          },
+          "serviceJourney": {
+            "directionType": "outbound",
+            "line": {
+              "publicCode": "25"
+            }
+          }
+        },
+        {
+          "realtime": true,
+          "expectedArrivalTime": "2019-10-24T12:36:44+0200",
+          "destinationDisplay": {
+            "frontText": "Lørenskog stasjon"
+          },
+          "serviceJourney": {
+            "directionType": "inbound",
+            "line": {
+              "publicCode": "25"
+            }
+          }
+        },
+        {
+          "realtime": true,
+          "expectedArrivalTime": "2019-10-24T12:41:19+0200",
+          "destinationDisplay": {
+            "frontText": "Grorud T"
+          },
+          "serviceJourney": {
+            "directionType": "inbound",
+            "line": {
+              "publicCode": "31"
+            }
+          }
+        },
+        {
+          "realtime": true,
+          "expectedArrivalTime": "2019-10-24T12:41:53+0200",
+          "destinationDisplay": {
+            "frontText": "Tonsenhagen"
+          },
+          "serviceJourney": {
+            "directionType": "inbound",
+            "line": {
+              "publicCode": "31"
+            }
+          }
+        },
+        {
+          "realtime": true,
+          "expectedArrivalTime": "2019-10-24T12:42:00+0200",
+          "destinationDisplay": {
+            "frontText": "Fornebu"
+          },
+          "serviceJourney": {
+            "directionType": "outbound",
+            "line": {
+              "publicCode": "31"
+            }
+          }
+        },
+        {
+          "realtime": true,
+          "expectedArrivalTime": "2019-10-24T12:47:41+0200",
+          "destinationDisplay": {
+            "frontText": "Grorud T"
+          },
+          "serviceJourney": {
+            "directionType": "inbound",
+            "line": {
+              "publicCode": "31"
+            }
+          }
+        },
+        {
+          "realtime": true,
+          "expectedArrivalTime": "2019-10-24T12:48:00+0200",
+          "destinationDisplay": {
+            "frontText": "Snarøya"
+          },
+          "serviceJourney": {
+            "directionType": "outbound",
+            "line": {
+              "publicCode": "31"
+            }
+          }
+        },
+        {
+          "realtime": true,
+          "expectedArrivalTime": "2019-10-24T12:50:00+0200",
+          "destinationDisplay": {
+            "frontText": "Lørenskog stasjon"
+          },
+          "serviceJourney": {
+            "directionType": "inbound",
+            "line": {
+              "publicCode": "25"
+            }
+          }
+        },
+        {
+          "realtime": true,
+          "expectedArrivalTime": "2019-10-24T12:51:00+0200",
+          "destinationDisplay": {
+            "frontText": "Majorstuen"
+          },
+          "serviceJourney": {
+            "directionType": "outbound",
+            "line": {
+              "publicCode": "25"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
