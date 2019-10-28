@@ -144,9 +144,6 @@ def get_departures_func():
         nonlocal cache
         nonlocal last_call
 
-        # Remove past departures
-        cache = [d for d in cache if d.eta > datetime.now()]
-
         # Rate limit upstream API calls
         if not last_call or datetime.now() > (last_call + timedelta(seconds=30)):
             try:
