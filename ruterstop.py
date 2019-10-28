@@ -164,13 +164,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--stop-id',
-        help="Find stops at https://stoppested.entur.org (guest:guest)")
+        help="find stops at https://stoppested.entur.org (guest:guest)")
 
     parser.add_argument('--direction', choices=["inbound", "outbound"],
-        help="Filter direction of departures")
+        help="filter direction of departures")
 
     parser.add_argument('--server', action="store_true",
-        help="Start a HTTP server")
+        help="start a HTTP server")
 
     parser.add_argument('--host', type=str, default="0.0.0.0",
         help="HTTP server hostname")
@@ -179,7 +179,7 @@ if __name__ == "__main__":
         help="HTTP server listen port")
 
     parser.add_argument('--debug', action="store_true",
-        help="Enable debug logging")
+        help="enable debug logging")
 
     args = parser.parse_args()
 
