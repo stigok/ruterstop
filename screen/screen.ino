@@ -31,15 +31,18 @@ void setup() {
   Serial.begin(115200);
 
   // Display init
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Address 0x3C for 128x32
+  display.display();
+  delay(1000);
+
   display.clearDisplay();
   display.display();
   display.setTextSize(1);
   display.setCursor(0, 0);
   display.setTextColor(WHITE);
 
-  logln("WiFi connecting:");
-  logln(ssid);
+  log("WiFi connecting:\n");
+  log(String(ssid) + '\n');
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -49,8 +52,8 @@ void setup() {
   }
 
   clear();
-  logln("Connected!");
-  logln(WiFi.localIP().toString());
+  log("Connected!\n");
+  log("IP:" + WiFi.localIP().toString() + '\n');
   delay(3000);
 }
 
@@ -66,15 +69,9 @@ void log(String s) {
   Serial.print(s);
 }
 
-void logln(String s) {
-  log(s);
-  display.println();
-  Serial.println();
-}
-
-void errorln(String s) {
+void error(String s) {
   clear();
-  logln(String("err: ") + s);
+  log(String("err: ") + s + '\n');
   delay(3000);
 }
 
@@ -83,13 +80,13 @@ void loop() {
   HTTPClient http;
 
   if (!http.begin(client, url)) {
-    errorln("http unable to connect");
+    error("http unable to connect\n");
     return;
   }
 
   int code = http.GET();
   if (code <= 0) {
-    errorln(http.errorToString(code).c_str());
+    error(String("HTTP error (") + http.errorToString(code).c_str() + ")\n");
     return;
   }
 
