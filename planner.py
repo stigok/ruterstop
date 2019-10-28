@@ -50,19 +50,24 @@ def norwegian_ascii(s):
 
 def human_delta(until=None, *, since=None):
     """
-    Return a 7 char long string describing minutes left 'until' date occurs.
+    Return a 6 char long string describing minutes left 'until' date occurs.
     Example output:
-    < 1 min
-      7 min
-     10 min
-     99 min
+     1 min
+     7 min
+    10 min
+    99 min
     """
     if not since:
         since = datetime.now()
-    delta = until.timestamp() - since.timestamp()
-    mins  = min(delta / 60, 99) # no more than two digits long
-    sign  = '<' if mins < 1 else ' '
-    return "{}{:2} min".format(sign, math.ceil(mins))
+
+    if until <= since:
+        mins = 0
+    else:
+        secs = (until - since).seconds
+        mins = math.floor(secs / 60)
+        mins = min(mins, 99) # no more than two digits long
+
+    return "{:2} min".format(mins)
 
 
 class Departure(namedtuple("Departure", ["line", "name", "eta", "direction"])):
@@ -107,6 +112,8 @@ def parse_departures(raw_dict):
             )
 
 
+# TODO: This function does not bring a lot to the table. Rename or remove?
+# TODO: Make this a generator function instead? Since parse_departures does it.
 def get_departures(stop_id, *, directions=None):
     """
     Return a list of departures for a particular stop.
