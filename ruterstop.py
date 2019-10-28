@@ -164,7 +164,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--stop-id',
-        default="6013", # Stig (Årvoll, Oslo)
         help="Find stops at https://stoppested.entur.org (guest:guest)")
 
     parser.add_argument('--direction', choices=["inbound", "outbound"],
