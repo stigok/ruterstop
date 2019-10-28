@@ -163,7 +163,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--stop-id',
+    parser.add_argument('--stop-id', required=True,
         help="find stops at https://stoppested.entur.org (guest:guest)")
 
     parser.add_argument('--direction', choices=["inbound", "outbound"],
