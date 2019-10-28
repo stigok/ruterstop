@@ -21,7 +21,7 @@ Adafruit_SSD1306 display(OLED_RESET);
 
 const char* ssid = "Mr. M";
 const char* password = "Lollipop";
-const char* url = "http://192.168.1.19:4000/";
+const char* url = "http://192.168.0.7:4000/";
 
 // SHA1 fingerprint of a certificate to pin
 //const char* fingerprint = "FB B4 E4 23 96 AB 9E 4D 2C 09 97 11 CC 21 BE 58 53 73 84 07";
