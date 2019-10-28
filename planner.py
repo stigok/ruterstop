@@ -162,8 +162,6 @@ def get_departures_func():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-
     # Parse command line arguments
     import argparse
     parser = argparse.ArgumentParser()
@@ -184,8 +182,15 @@ if __name__ == "__main__":
     parser.add_argument('--port', type=int, default=4000,
         help="HTTP server listen port")
 
+    parser.add_argument('--debug', action="store_true",
+        help="Enable debug logging")
+
     args = parser.parse_args()
 
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
 
     cached_get_departures = get_departures_func()
 
