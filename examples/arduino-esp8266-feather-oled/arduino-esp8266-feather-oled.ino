@@ -28,14 +28,9 @@ void setup() {
 
   // Display init
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Address 0x3C for 128x32
-  display.display();
-  delay(1000);
-
-  display.clearDisplay();
-  display.display();
   display.setTextSize(1);
-  display.setCursor(0, 0);
   display.setTextColor(WHITE);
+  clear();
 
   log("WiFi connecting:\n");
   log(String(ssid) + '\n');
@@ -93,10 +88,8 @@ void loop() {
   }
 
   String payload = http.getString();
-  display.clearDisplay();
-  display.setCursor(0, 0);
-  display.print(payload);
-  display.display();
+  clear();
+  log(payload);
 
   http.end();
 
