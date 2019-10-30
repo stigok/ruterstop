@@ -139,7 +139,7 @@ def get_departures_func():
     """
     Return a wrapped get_departures function that always returns a list.
     If an API request fails, it will return a cached version of the last
-    successful request made, Departures with an 'eta' in the past are removed.
+    successful request made.
     """
     cache = []
     last_call = None
