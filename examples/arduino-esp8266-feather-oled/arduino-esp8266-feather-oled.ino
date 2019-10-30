@@ -35,7 +35,7 @@ void setup() {
   log("WiFi connecting:\n");
   log(String(ssid) + '\n');
 
-  WiFi.mode(WIFI_STA);
+  WiFi.mode(WIFI_STA); // client mode (not AP)
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     log(".");
