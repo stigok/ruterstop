@@ -87,5 +87,5 @@ void loop() {
   display.display();
 
   Serial.println("done. sleeping...");
-  delay(3000);
+  delay(5000);
 }
