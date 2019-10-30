@@ -12,8 +12,8 @@ Adafruit_SSD1306 display(OLED_RESET);
 
 #define USER_AGENT_STR "foodshop/0.1 (esp8266 / huzzah)"
 
-const char* ssid = "Mr. M";
-const char* password = "Lollipop";
+const char* ssid = "wifiname";
+const char* password = "wifipass";
 const char* url = "http://192.168.0.7:4000/";
 
 void setup() {
