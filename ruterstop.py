@@ -3,8 +3,8 @@
 Get realtime stop information for a specific public transport station in Oslo,
 Norway. Data is requested from the EnTur JourneyPlanner API.
 
-- In server mode, API calls are memoized to reduce load
-- Use --help for usage info.
+- API calls are memoized to reduce load in `--server` mode
+- Use `--help` for usage info.
 """
 
 import logging
@@ -41,15 +41,15 @@ ENTUR_GRAPHQL_QUERY = """
 }
 """
 
-def norwegian_ascii(s):
+def norwegian_ascii(unicode_str):
     """
     Returns an ASCII string with Norwegian chars replaced with their closest
     ASCII representation. Other non-ASCII characters are ignored and removed.
     """
-    s = re.sub(r"ø", "oe", s, flags=re.IGNORECASE)
-    s = re.sub(r"æ", "ae", s, flags=re.IGNORECASE)
-    s = re.sub(r"å", "aa", s, flags=re.IGNORECASE)
-    return s.encode("ascii", "ignore").decode()
+    unicode_str = re.sub(r"ø", "oe", unicode_str, flags=re.IGNORECASE)
+    unicode_str = re.sub(r"æ", "ae", unicode_str, flags=re.IGNORECASE)
+    unicode_str = re.sub(r"å", "aa", unicode_str, flags=re.IGNORECASE)
+    return unicode_str.encode("ascii", "ignore").decode()
 
 
 def human_delta(until=None, *, since=None):
@@ -94,9 +94,9 @@ def get_realtime_stop(*, stop_id=None):
         "ET-Client-Name": "stigok - python-app",
         "ET-Client-Id": ENTUR_CLIENT_ID
     }
-    q = ENTUR_GRAPHQL_QUERY % dict(stop_id=stop_id)
-    data = dict(query=q, variables={})
-    res  = requests.post(ENTUR_GRAPHQL_ENDPOINT, headers=headers, json=data, timeout=5)
+    qry = ENTUR_GRAPHQL_QUERY % dict(stop_id=stop_id)
+    res = requests.post(ENTUR_GRAPHQL_ENDPOINT, headers=headers, timeout=5,
+                        json=dict(query=qry, variables={}))
     res.raise_for_status()
     return res.json()
 
@@ -144,16 +144,16 @@ def get_departures_func():
     cache = []
     last_call = None
 
-    def wrapped(*args, **kwargs):
+    def wrapped(*_args, **_kwargs):
         nonlocal cache
         nonlocal last_call
 
         # Rate limit upstream API calls
         if not last_call or datetime.now() > (last_call + timedelta(seconds=30)):
             try:
-                cache = get_departures(*args, **kwargs)
-            except requests.exceptions.RequestException as e:
-                logging.error(e)
+                cache = get_departures(*_args, **_kwargs)
+            except requests.exceptions.RequestException as ex:
+                logging.error(ex)
 
             last_call = datetime.now()
 
@@ -162,30 +162,25 @@ def get_departures_func():
     return wrapped
 
 
-if __name__ == "__main__":
+def main():
+    """Main function for CLI usage"""
     # Parse command line arguments
     import argparse
-    parser = argparse.ArgumentParser()
+    par = argparse.ArgumentParser()
+    par.add_argument('--stop-id', required=True,
+                     help="find stops at https://stoppested.entur.org (guest:guest)")
+    par.add_argument('--direction', choices=["inbound", "outbound"],
+                     help="filter direction of departures")
+    par.add_argument('--server', action="store_true",
+                     help="start a HTTP server")
+    par.add_argument('--host', type=str, default="0.0.0.0",
+                     help="HTTP server hostname")
+    par.add_argument('--port', type=int, default=4000,
+                     help="HTTP server listen port")
+    par.add_argument('--debug', action="store_true",
+                     help="enable debug logging")
 
-    parser.add_argument('--stop-id', required=True,
-        help="find stops at https://stoppested.entur.org (guest:guest)")
-
-    parser.add_argument('--direction', choices=["inbound", "outbound"],
-        help="filter direction of departures")
-
-    parser.add_argument('--server', action="store_true",
-        help="start a HTTP server")
-
-    parser.add_argument('--host', type=str, default="0.0.0.0",
-        help="HTTP server hostname")
-
-    parser.add_argument('--port', type=int, default=4000,
-        help="HTTP server listen port")
-
-    parser.add_argument('--debug', action="store_true",
-        help="enable debug logging")
-
-    args = parser.parse_args()
+    args = par.parse_args()
 
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
@@ -197,7 +192,7 @@ if __name__ == "__main__":
     if args.server:
 
         @bottle.route("/")
-        def index():
+        def _():
             deps = cached_get_departures(args.stop_id, directions=args.direction)
             return '\n'.join([str(d) for d in deps])
 
@@ -206,6 +201,8 @@ if __name__ == "__main__":
     # Otherwise print out stop information and exit
     else:
         deps = cached_get_departures(args.stop_id, directions=args.direction)
-        for d in deps:
-            print(d)
+        for item in deps:
+            print(item)
 
+if __name__ == "__main__":
+    main()
