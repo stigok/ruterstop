@@ -10,6 +10,8 @@ Et program som viser sanntidsinformasjon for stoppesteder i Oslo og Akershus.
 
 Innspill, tanker og feilmeldinger mottas med glede!
 
+![Adafruit Feather HUZZAH ESP8266 med OLED FeatherWing som kjører ruterstop.py][demopic-1]
+
 ## Brukerveiledning
 
 Trenger Python >=3.6 for å kjøre.
@@ -45,10 +47,12 @@ $ ruterstop.py --stop-id 6013
 
 ## Eksempel
 
-Fungerende kode for en Adafruit HUZZAH med OLED FeatherWing finnes i
+Fungerende kode for en Adafruit Feather HUZZAH ESP8266 med OLED FeatherWing finnes i
 [eksempel-mappen](./examples/arduino-esp8266-feather-oled).
 
 ## Referanser og linker
 - [Søk etter stoppesteder](https://stoppested.entur.org/?stopPlaceId=NSR:StopPlace:6013) (Logg inn med guest:guest)
 - [EnTur JourneyPlanner docs](https://developer.entur.org/pages-journeyplanner-journeyplanner)
 - [EnTur JourneyPlanner IDE](https://api.entur.io/journey-planner/v2/ide/)
+
+[demopic-1]: ./demo-1.png
