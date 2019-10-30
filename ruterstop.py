@@ -1,23 +1,28 @@
 #!/usr/bin/env python3
-import dateutil.parser
-import json
+"""
+Get realtime stop information for a specific public transport station in Oslo,
+Norway. Data is requested from the EnTur JourneyPlanner API.
+
+- In server mode, API calls are memoized to reduce load
+- Use --help for usage info.
+"""
+
 import logging
 import math
 import re
 import socket
-import sys
 from collections import namedtuple
 from datetime import datetime, timedelta
+import dateutil.parser
 
-import bottle
 import requests
+import bottle
 
 ENTUR_CLIENT_ID = socket.gethostname()
 ENTUR_GRAPHQL_ENDPOINT = "https://api.entur.io/journey-planner/v2/graphql"
 ENTUR_GRAPHQL_QUERY = """
 {
   stopPlace(id: "NSR:StopPlace:%(stop_id)s") {
-    id
     name
     estimatedCalls(timeRange: 72100, numberOfDepartures: 10) {
       realtime
@@ -27,9 +32,7 @@ ENTUR_GRAPHQL_QUERY = """
       }
       serviceJourney {
         directionType
-        id
         line {
-          id
           publicCode
         }
       }
