@@ -1,3 +1,11 @@
+/*
+Connect to WiFi and query a URL for a payload to be printed on an LCD screen.
+This code is somewhat specific for an Adafruit HUZZAH with an OLED FeatherWing
+attached.
+
+Author: stigok (stig@stigok.com)
+*/
+
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
