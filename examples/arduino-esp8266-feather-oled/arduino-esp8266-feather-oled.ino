@@ -10,8 +10,13 @@
 #define OLED_RESET 3
 Adafruit_SSD1306 display(OLED_RESET);
 
-const char* ssid = "wifiname";
-const char* password = "wifipass";
+#ifndef STASSID
+#define STASSID "your-ssid"
+#define STAPSK  "your-password"
+#endif
+
+const char* ssid = STASSID;
+const char* password = STAPSK;
 const char* url = "http://192.168.0.7:4000/";
 
 void setup() {
