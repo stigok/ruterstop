@@ -19,6 +19,9 @@ const char* ssid = STASSID;
 const char* password = STAPSK;
 const char* url = "http://192.168.0.7:4000/";
 
+WiFiClient client;
+HTTPClient http;
+
 void setup() {
   // Serial init
   Serial.begin(115200);
@@ -48,6 +51,9 @@ void setup() {
   log("Connected!\n");
   log("IP:" + WiFi.localIP().toString() + '\n');
   delay(3000);
+
+  // keep-alive
+  http.setReuse(true);
 }
 
 void clear() {
@@ -69,8 +75,11 @@ void error(String s) {
 }
 
 void loop() {
-  WiFiClient client;
-  HTTPClient http;
+  if (WiFi.status() != WL_CONNECTED) {
+    error("lost wifi connection.\nrestarting...");
+    ESP.restart();
+    return;
+  }
 
   if (!http.begin(client, url)) {
     error("http unable to connect\n");
@@ -88,6 +97,8 @@ void loop() {
   display.setCursor(0, 0);
   display.print(payload);
   display.display();
+
+  http.end();
 
   Serial.println("done. sleeping...");
   delay(5000);
