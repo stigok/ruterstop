@@ -91,7 +91,7 @@ def get_realtime_stop(*, stop_id=None):
     logging.debug("Requesting fresh data from API")
     headers = {
         "Accept": "application/json",
-        "ET-Client-Name": "stigok - python-app",
+        "ET-Client-Name": "ruterstop - stigok/ruterstop",
         "ET-Client-Id": ENTUR_CLIENT_ID
     }
     qry = ENTUR_GRAPHQL_QUERY % dict(stop_id=stop_id)
