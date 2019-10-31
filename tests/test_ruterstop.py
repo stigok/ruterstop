@@ -9,7 +9,7 @@ from unittest.mock import patch
 import ruterstop as api
 
 
-class PlannelTestCase(unittest.TestCase):
+class RuterstopTestCase(unittest.TestCase):
     def setUp(self):
         # Load test data for the external API
         p = os.path.realpath(os.path.dirname(__file__))
