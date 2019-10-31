@@ -1,3 +1,4 @@
+import inspect
 import json
 import os
 import types
@@ -56,9 +57,9 @@ class PlannelTestCase(unittest.TestCase):
             self.assertIsNotNone(kwargs.get("timeout"))
 
     def test_parse_departures(self):
-        # TODO: use inspect.isgeneratorfunction instead? is that cleaner?
+        self.assertTrue(inspect.isgeneratorfunction(api.parse_departures))
+
         res = api.parse_departures(self.raw_departure_data)
-        self.assertIsInstance(res, types.GeneratorType, "does not return a generator")
 
         i = 0
         for d in res:
