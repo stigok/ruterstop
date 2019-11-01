@@ -1,9 +1,9 @@
 import inspect
 import json
 import os
-import types
-import unittest
 from datetime import datetime, timedelta
+
+import unittest
 from unittest.mock import Mock, MagicMock, patch
 
 import ruterstop as api
@@ -50,7 +50,7 @@ class RuterstopTestCase(unittest.TestCase):
         with patch('requests.post') as mock:
             api.get_realtime_stop(stop_id=1337)
             mock.assert_called_once()
-            args, kwargs = mock.call_args
+            _, kwargs = mock.call_args
 
             self.assertIsNotNone(kwargs["headers"]["ET-Client-Name"])
             self.assertIsNotNone(kwargs["headers"]["ET-Client-Id"])
