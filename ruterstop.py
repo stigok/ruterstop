@@ -3,7 +3,7 @@
 Get realtime stop information for a specific public transport station in Oslo,
 Norway. Data is requested from the EnTur JourneyPlanner API.
 
-- API calls are memoized to reduce load in `--server` mode
+- API calls are cached to reduce load in `--server` mode
 - Use `--help` for usage info.
 """
 
