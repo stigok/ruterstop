@@ -9,7 +9,6 @@ Norway. Data is requested from the EnTur JourneyPlanner API.
 
 import functools
 import logging
-import math
 import re
 import socket
 from collections import namedtuple
@@ -57,22 +56,27 @@ def human_delta(until=None, *, since=None):
     """
     Return a 6 char long string describing minutes left 'until' date occurs.
     Example output:
+       naa (if delta < 60 seconds)
      1 min
      7 min
     10 min
     99 min
     """
+    now_str = "{:>6}".format("naa")
     if not since:
         since = datetime.now()
 
-    if until <= since:
-        mins = 0
-    else:
-        secs = (until - since).seconds
-        mins = math.floor(secs / 60)
-        mins = min(mins, 99) # no more than two digits long
+    if since > until:
+        return now_str
 
-    return "{:2} min".format(mins)
+    secs = (until - since).seconds
+    mins = int(secs / 60) # floor
+    mins = max(0, min(mins, 99)) # between 0 and 99
+
+    if mins < 1:
+        return now_str
+    else:
+        return "{:2} min".format(mins)
 
 
 class Departure(namedtuple("Departure", ["line", "name", "eta", "direction"])):
