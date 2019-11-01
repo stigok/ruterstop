@@ -40,12 +40,15 @@ class DepartureClassTestCase(unittest.TestCase):
             ref = datetime.min
             mock_date.now.return_value = ref
             in_7_mins = ref + timedelta(minutes=7)
+            in_77_mins = ref + timedelta(minutes=77)
 
+            # Test valid representation
             d = api.Departure(line=21, name="twentyone", eta=in_7_mins, direction="o")
             self.assertEqual(str(d), "21 twentyone    7 min")
 
-            d = api.Departure(line=21, name="longname" * 3, eta=in_7_mins, direction="o")
-            self.assertEqual(str(d), "21 longnamelon  7 min")
+            # Test long name trimming
+            d = api.Departure(line=21, name="longname" * 3, eta=in_77_mins, direction="o")
+            self.assertEqual(str(d), "21 longnamelon 77 min")
 
 
 class RuterstopTestCase(unittest.TestCase):
