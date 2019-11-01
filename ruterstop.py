@@ -78,8 +78,8 @@ def human_delta(until=None, *, since=None):
 class Departure(namedtuple("Departure", ["line", "name", "eta", "direction"])):
     """Represents a transport departure"""
     def __str__(self):
-        return "{:2} {:10} {:>7}".format(
-            self.line, self.name[:10], human_delta(until=self.eta))
+        return "{:2} {:11}{:>7}".format(
+            self.line, self.name[:11], human_delta(until=self.eta))
 
 
 def get_realtime_stop(*, stop_id=None):

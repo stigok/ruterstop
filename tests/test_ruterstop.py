@@ -9,6 +9,20 @@ from unittest.mock import Mock, MagicMock, patch
 import ruterstop as api
 
 
+class DepartureClassTestCase(unittest.TestCase):
+    def test_str_representation(self):
+        with patch('ruterstop.datetime') as mock_date:
+            ref = datetime.min
+            mock_date.now.return_value = ref
+            in_7_mins = ref + timedelta(minutes=7)
+
+            d = api.Departure(line=21, name="twentyone", eta=in_7_mins, direction="o")
+            self.assertEqual(str(d), "21 twentyone    7 min")
+
+            d = api.Departure(line=21, name="longname" * 3, eta=in_7_mins, direction="o")
+            self.assertEqual(str(d), "21 longnamelon  7 min")
+
+
 class RuterstopTestCase(unittest.TestCase):
     def setUp(self):
         # Load test data for the external API
