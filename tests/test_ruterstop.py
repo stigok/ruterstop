@@ -138,11 +138,11 @@ class RuterstopTestCase(unittest.TestCase):
 
 
         # Test cache function
-        now.return_value = 0
+        now.return_value = datetime.min
         test_set()
         spy.reset_mock()
 
         # Test expired key invokes function again
-        now.return_value = 61
+        now.return_value = datetime.min + timedelta(seconds=61)
         test_set()
         spy.reset_mock()
