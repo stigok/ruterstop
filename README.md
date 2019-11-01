@@ -3,9 +3,8 @@
 Et program som viser sanntidsinformasjon for stoppesteder i Oslo og Akershus.
 
 - Lister opp de neste 10 avgangene
-- Starter en HTTP server i `--server` modus
-- Velg fast kjøreretning med `--direction`
-- *0 min* er det samme som *nå*
+- Starter en HTTP server med `--server`
+- Velg en bestemt kjøreretning med `--direction`
 - Bruk `--help` for full hjelp
 
 Innspill, tanker og feilmeldinger mottas med glede!
@@ -29,30 +28,32 @@ Installer programmet (hvis du vil):
 # python setup.py install
 ```
 
-Kjør programmet med et valgt stoppested. *6013* er Stig, på Årvoll i Oslo:
+Kjør programmet med et valgt stoppested. *6013* er Stig, på Årvoll i Oslo.
+Søk opp flere stopp fra [EnTur sine sider for stoppesteder][stoppesteder].
 
 ```
-$ ruterstop.py --stop-id 6013
-31 Grorud T     1 min
-25 Majorstuen   4 min
-31 Fornebu      6 min
-25 Loerenskog   8 min
-31 Tonsenhage  11 min
-31 Snaroeya    16 min
-25 Majorstuen  19 min
-31 Grorud T    21 min
-25 Loerenskog  23 min
-31 Fornebu     26 min
+$ python ruterstop.py --stop-id 6013 --direction outbound
+31 Snaroeya       naa
+31 Fornebu      5 min
+25 Majorstuen   6 min
+33 Filipstad    6 min
+25 Majorstuen   8 min
 ```
 
-## Eksempel
+## Motivasjon
 
-Fungerende kode for en Adafruit Feather HUZZAH ESP8266 med OLED FeatherWing finnes i
-[eksempel-mappen](./examples/arduino-esp8266-feather-oled).
+Jeg fikk et ønske om å kunne se avganger fra mitt nærmeste stoppested mens
+jeg sitter ved kjøkkenbordet, uten å måtte bruke mobilen.
+Jeg skrev dette programmet som en backend til en ESP8266-variant med en
+OLED skjerm.
+
+Fungerende kode for en Adafruit Feather HUZZAH ESP8266 med en OLED FeatherWing
+finnes i [eksempel-mappen](./examples/arduino-esp8266-feather-oled).
 
 ## Referanser og linker
-- [Søk etter stoppesteder](https://stoppested.entur.org/?stopPlaceId=NSR:StopPlace:6013) (Logg inn med guest:guest)
+- [Søk etter stoppesteder][stoppesteder] (Logg inn med guest:guest)
 - [EnTur JourneyPlanner docs](https://developer.entur.org/pages-journeyplanner-journeyplanner)
 - [EnTur JourneyPlanner IDE](https://api.entur.io/journey-planner/v2/ide/)
 
 [demopic-1]: ./demo-1.png
+[stoppesteder]: https://stoppested.entur.org/?stopPlaceId=NSR:StopPlace:6013
