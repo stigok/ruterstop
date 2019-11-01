@@ -4,7 +4,7 @@ import os
 import types
 import unittest
 from datetime import datetime, timedelta
-from unittest.mock import patch
+from unittest.mock import Mock, MagicMock, patch
 
 import ruterstop as api
 
@@ -94,22 +94,33 @@ class RuterstopTestCase(unittest.TestCase):
                     self.assertIsInstance(d, api.Departure)
                     self.assertEqual(d.direction, direction)
 
-    def test_get_departures_func(self):
-        stop_id = 1337
+    def test_timed_cache(self):
+        now = MagicMock()
+        spy = Mock(return_value=1) # don't need return value
 
-        with patch('ruterstop.get_realtime_stop') as mock:
-            mock.return_value = self.raw_departure_data
+        @api.timed_cache(expires_sec=60, now=now)
+        def func(a, b=None):
+            spy() # for counting calls
+            return [a, b] # return list to compare references
 
-            # Create the cached function
-            fn = api.get_departures_func()
-            self.assertIsInstance(fn, types.FunctionType)
+        def test_set():
+            res1 = func(1, 2)
+            res2 = func(1, 2)
+            self.assertEqual(res1, [1, 2])
+            self.assertIs(res1, res2, "did not return same object as first call")
+            self.assertEqual(spy.call_count, 1)
 
-            # Assert that immediately subsequent calls are memoized
-            # (some sort of cache is implemented)
-            res_1 = fn(stop_id=stop_id)
-            self.assertIsInstance(res_1, list)
-            self.assertIs(res_1, fn(stop_id=stop_id))
-            self.assertIs(res_1, fn(stop_id=stop_id))
+            res3 = func(2, 2)
+            self.assertEqual(res3, [2, 2])
+            self.assertEqual(spy.call_count, 2)
 
-            # Assert that API is only queried once
-            mock.assert_called_once_with(stop_id=stop_id)
+
+        # Test cache function
+        now.return_value = 0
+        test_set()
+        spy.reset_mock()
+
+        # Test expired key invokes function again
+        now.return_value = 61
+        test_set()
+        spy.reset_mock()

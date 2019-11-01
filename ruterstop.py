@@ -7,6 +7,7 @@ Norway. Data is requested from the EnTur JourneyPlanner API.
 - Use `--help` for usage info.
 """
 
+import functools
 import logging
 import math
 import re
@@ -135,31 +136,29 @@ def get_departures(stop_id, *, directions=None):
     return [d for d in departures if d.direction in directions]
 
 
-def get_departures_func():
+def timed_cache(*, expires_sec=60, now=datetime.now):
     """
-    Return a wrapped get_departures function that always returns a list.
-    If an API request fails, it will return a cached version of the last
-    successful request made.
+    Decorator function to cache function calls with same arguments for a set
+    amount of time.
+
+    It does not delete any keys from the cache, so it might grow indefinitely.
     """
-    cache = []
-    last_call = None
+    cache = {}
 
-    def wrapped(*_args, **_kwargs):
-        nonlocal cache
-        nonlocal last_call
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*_args, **_kwargs):
+            time = now()
+            key = functools._make_key(_args, _kwargs, False)
 
-        # Rate limit upstream API calls
-        if not last_call or datetime.now() > (last_call + timedelta(seconds=30)):
-            try:
-                cache = get_departures(*_args, **_kwargs)
-            except requests.exceptions.RequestException as ex:
-                logging.error(ex)
+            if key not in cache or time > cache[key]["timestamp"] + expires_sec:
+                cache[key] = dict(value=func(*_args, **_kwargs), timestamp=time)
 
-            last_call = datetime.now()
+            return cache[key]["value"]
 
-        return cache
+        return wrapper
 
-    return wrapped
+    return decorator
 
 
 def main():
@@ -187,7 +186,10 @@ def main():
     else:
         logging.basicConfig(level=logging.INFO)
 
-    cached_get_departures = get_departures_func()
+    @timed_cache(expires_sec=60)
+    def cached_get_departures(stop_id, directions):
+        for dep in get_departures(stop_id=stop_id, directions=directions):
+            yield dep
 
     if args.server:
 
