@@ -188,8 +188,7 @@ def main():
 
     @timed_cache(expires_sec=60)
     def cached_get_departures(stop_id, directions):
-        for dep in get_departures(stop_id=stop_id, directions=directions):
-            yield dep
+        return get_departures(stop_id=stop_id, directions=directions)
 
     if args.server:
 
