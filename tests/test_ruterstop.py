@@ -13,8 +13,8 @@ class HumanDeltaTestCase(unittest.TestCase):
     def test_output(self):
         ref = datetime.now()
         testcases = [
-            (ref - timedelta(seconds=20),  " 0 min"),
-            (ref + timedelta(seconds=20),  " 0 min"),
+            (ref - timedelta(seconds=20),  "   naa"),
+            (ref + timedelta(seconds=20),  "   naa"),
             (ref + timedelta(minutes=1),   " 1 min"),
             (ref + timedelta(seconds=100), " 1 min"),
             (ref + timedelta(minutes=2),   " 2 min"),
