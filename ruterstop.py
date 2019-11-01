@@ -151,7 +151,7 @@ def timed_cache(*, expires_sec=60, now=datetime.now):
             time = now()
             key = functools._make_key(_args, _kwargs, False)
 
-            if key not in cache or time > cache[key]["timestamp"] + expires_sec:
+            if key not in cache or time > cache[key]["timestamp"] + timedelta(seconds=expires_sec):
                 cache[key] = dict(value=func(*_args, **_kwargs), timestamp=time)
 
             return cache[key]["value"]
