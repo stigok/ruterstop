@@ -78,8 +78,8 @@ def human_delta(until=None, *, since=None):
 class Departure(namedtuple("Departure", ["line", "name", "eta", "direction"])):
     """Represents a transport departure"""
     def __str__(self):
-        return "{:2} {:10} {:>7}".format(
-            self.line, self.name[:10], human_delta(until=self.eta))
+        return "{:2} {:11}{:>7}".format(
+            self.line, self.name[:11], human_delta(until=self.eta))
 
 
 def get_realtime_stop(*, stop_id=None):
@@ -151,7 +151,7 @@ def timed_cache(*, expires_sec=60, now=datetime.now):
             time = now()
             key = functools._make_key(_args, _kwargs, False)
 
-            if key not in cache or time > cache[key]["timestamp"] + expires_sec:
+            if key not in cache or time > cache[key]["timestamp"] + timedelta(seconds=expires_sec):
                 cache[key] = dict(value=func(*_args, **_kwargs), timestamp=time)
 
             return cache[key]["value"]

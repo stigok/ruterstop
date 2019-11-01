@@ -9,6 +9,45 @@ from unittest.mock import Mock, MagicMock, patch
 import ruterstop as api
 
 
+class HumanDeltaTestCase(unittest.TestCase):
+    def test_output(self):
+        ref = datetime.now()
+        testcases = [
+            (ref - timedelta(seconds=20),  " 0 min"),
+            (ref + timedelta(seconds=20),  " 0 min"),
+            (ref + timedelta(minutes=1),   " 1 min"),
+            (ref + timedelta(seconds=100), " 1 min"),
+            (ref + timedelta(minutes=2),   " 2 min"),
+            (ref + timedelta(minutes=10),  "10 min"),
+            (ref + timedelta(hours=100),   "99 min")
+        ]
+
+        for i, case in enumerate(testcases):
+            val, expected = case
+            res = api.human_delta(until=val, since=ref)
+            self.assertEqual(res, expected, "test case #%d" % (i + 1))
+
+    def test_default_kwarg_value(self):
+        with patch('ruterstop.datetime') as mock_date:
+            mock_date.now.return_value = datetime.min
+            api.human_delta(until=datetime.min + timedelta(seconds=120))
+            mock_date.now.assert_called_once()
+
+
+class DepartureClassTestCase(unittest.TestCase):
+    def test_str_representation(self):
+        with patch('ruterstop.datetime') as mock_date:
+            ref = datetime.min
+            mock_date.now.return_value = ref
+            in_7_mins = ref + timedelta(minutes=7)
+
+            d = api.Departure(line=21, name="twentyone", eta=in_7_mins, direction="o")
+            self.assertEqual(str(d), "21 twentyone    7 min")
+
+            d = api.Departure(line=21, name="longname" * 3, eta=in_7_mins, direction="o")
+            self.assertEqual(str(d), "21 longnamelon  7 min")
+
+
 class RuterstopTestCase(unittest.TestCase):
     def setUp(self):
         # Load test data for the external API
@@ -27,23 +66,6 @@ class RuterstopTestCase(unittest.TestCase):
         for i, case in enumerate(testcases):
             val, expected = case
             res = api.norwegian_ascii(val)
-            self.assertEqual(res, expected, "test case #%d" % (i + 1))
-
-    def test_human_delta(self):
-        ref = datetime.now()
-        testcases = [
-            (ref - timedelta(seconds=20),  " 0 min"),
-            (ref + timedelta(seconds=20),  " 0 min"),
-            (ref + timedelta(minutes=1),   " 1 min"),
-            (ref + timedelta(seconds=100), " 1 min"),
-            (ref + timedelta(minutes=2),   " 2 min"),
-            (ref + timedelta(minutes=10),  "10 min"),
-            (ref + timedelta(hours=100),   "99 min")
-        ]
-
-        for i, case in enumerate(testcases):
-            val, expected = case
-            res = api.human_delta(until=val, since=ref)
             self.assertEqual(res, expected, "test case #%d" % (i + 1))
 
     def test_get_realtime_stop(self):
@@ -116,11 +138,11 @@ class RuterstopTestCase(unittest.TestCase):
 
 
         # Test cache function
-        now.return_value = 0
+        now.return_value = datetime.min
         test_set()
         spy.reset_mock()
 
         # Test expired key invokes function again
-        now.return_value = 61
+        now.return_value = datetime.min + timedelta(seconds=61)
         test_set()
         spy.reset_mock()
