@@ -13,7 +13,6 @@ import re
 import socket
 from collections import namedtuple
 from datetime import datetime, timedelta
-import dateutil.parser
 
 import requests
 import bottle
@@ -106,17 +105,24 @@ def get_realtime_stop(*, stop_id=None):
     return res.json()
 
 
-def parse_departures(raw_dict):
+def parse_departures(raw_dict, *, date_fmt="%Y-%m-%dT%H:%M:%S%z"):
     """
     Parse a JSON response dict from EnTur JourneyPlanner API and
     return a list of Departure objects.
+
+    Parsing relies on date format being exactly as specified in date_fmt.
+
+    Date is stored as time-zone unaware to avoid relying on a date parsing
+    library to handle time-zones.
     """
     if raw_dict["data"]["stopPlace"]:
         for dep in raw_dict["data"]["stopPlace"]["estimatedCalls"]:
+            eta = datetime.strptime(dep["expectedArrivalTime"],
+                                    date_fmt).replace(tzinfo=None)
             yield Departure(
                 line=dep["serviceJourney"]["line"]["publicCode"],
                 name=norwegian_ascii(dep["destinationDisplay"]["frontText"]),
-                eta=dateutil.parser.parse(dep["expectedArrivalTime"], ignoretz=True),
+                eta=eta,
                 direction=dep["serviceJourney"]["directionType"]
             )
 
