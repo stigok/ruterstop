@@ -96,29 +96,6 @@ class RuterstopTestCase(unittest.TestCase):
             self.assertIsNotNone(d.direction)
         self.assertNotEqual(i, 0, "no items were returned")
 
-    def test_get_departures(self):
-        stop_id = 1337
-
-        with patch('ruterstop.get_realtime_stop') as mock:
-            mock.return_value = self.raw_departure_data
-
-            res = api.get_departures(stop_id=stop_id)
-
-            # Assert that it calls on api.get_realtime_stop
-            mock.assert_called_once_with(stop_id=stop_id)
-
-            # Assert returns expected types
-            self.assertIsInstance(res, list, "does not return a list")
-            for d in res:
-                self.assertIsInstance(d, api.Departure)
-
-            # Filters on directions
-            for direction in ["inbound", "outbound"]:
-                res = api.get_departures(stop_id=stop_id, directions=direction)
-                for d in res:
-                    self.assertIsInstance(d, api.Departure)
-                    self.assertEqual(d.direction, direction)
-
     def test_timed_cache(self):
         now = MagicMock()
         spy = Mock(return_value=1) # don't need return value

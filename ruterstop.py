@@ -126,25 +126,6 @@ def parse_departures(raw_dict, *, date_fmt="%Y-%m-%dT%H:%M:%S%z"):
             )
 
 
-# TODO: This function does not bring a lot to the table. Rename or remove?
-# TODO: Make this a generator function instead? Since parse_departures does it.
-def get_departures(stop_id, *, directions=None):
-    """
-    Return a list of departures for a particular stop.
-    Use directions param to return items only going in a specific direction.
-    """
-    raw_stop = get_realtime_stop(stop_id=stop_id)
-    departures = parse_departures(raw_stop)
-
-    # Build direction filter list
-    if not directions:
-        directions = ["inbound", "outbound"]
-    elif not isinstance(directions, list):
-        directions = [directions]
-
-    return [d for d in departures if d.direction in directions]
-
-
 def timed_cache(*, expires_sec=60, now=datetime.now):
     """
     Decorator function to cache function calls with same arguments for a set
@@ -195,24 +176,29 @@ def main():
     else:
         logging.basicConfig(level=logging.INFO)
 
-    @timed_cache(expires_sec=60)
-    def cached_get_departures(stop_id, directions):
-        return get_departures(stop_id=stop_id, directions=directions)
+    # Create a cached function
+    get_cached_realtime_stop = timed_cache(expires_sec=60)(get_realtime_stop)
+
+    # Build direction filter list
+    if not args.direction:
+        directions = ["inbound", "outbound"]
+    else:
+        directions = [args.direction]
 
     if args.server:
-
         @bottle.route("/")
         def _():
-            deps = cached_get_departures(args.stop_id, directions=args.direction)
-            return '\n'.join([str(d) for d in deps])
+            raw_stop = get_cached_realtime_stop(stop_id=args.stop_id)
+            deps = parse_departures(raw_stop)
+            return '\n'.join([str(d) for d in deps if d.direction in directions])
 
         bottle.run(host=args.host, port=args.port)
 
     # Otherwise print out stop information and exit
     else:
-        deps = cached_get_departures(args.stop_id, directions=args.direction)
-        for item in deps:
-            print(item)
+        raw_stop = get_cached_realtime_stop(stop_id=args.stop_id)
+        for dep in parse_departures(raw_stop):
+            print(dep)
 
 
 if __name__ == "__main__":
