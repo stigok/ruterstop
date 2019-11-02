@@ -13,7 +13,7 @@ Innspill, tanker og feilmeldinger mottas med glede!
 
 ## Brukerveiledning
 
-Trenger Python >=3.6 for å kjøre.
+Trenger Python >=3.5 for å kjøre.
 
 Last ned kildekoden og installer avhengigheter:
 
