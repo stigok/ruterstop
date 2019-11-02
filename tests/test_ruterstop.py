@@ -31,7 +31,7 @@ class HumanDeltaTestCase(unittest.TestCase):
         with patch('ruterstop.datetime') as mock_date:
             mock_date.now.return_value = datetime.min
             api.human_delta(until=datetime.min + timedelta(seconds=120))
-            mock_date.now.assert_called_once()
+            self.assertEqual(mock_date.now.call_count, 1)
 
 
 class DepartureClassTestCase(unittest.TestCase):
@@ -74,7 +74,7 @@ class RuterstopTestCase(unittest.TestCase):
     def test_get_realtime_stop(self):
         with patch('requests.post') as mock:
             api.get_realtime_stop(stop_id=1337)
-            mock.assert_called_once()
+            self.assertEqual(mock.call_count, 1)
             _, kwargs = mock.call_args
 
             self.assertIsNotNone(kwargs["headers"]["ET-Client-Name"])
