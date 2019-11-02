@@ -3,7 +3,7 @@
 Get realtime stop information for a specific public transport station in Oslo,
 Norway. Data is requested from the EnTur JourneyPlanner API.
 
-- API calls are memoized to reduce load in `--server` mode
+- API calls are cached to reduce load in `--server` mode
 - Use `--help` for usage info.
 """
 
@@ -24,7 +24,6 @@ ENTUR_GRAPHQL_QUERY = """
   stopPlace(id: "NSR:StopPlace:%(stop_id)s") {
     name
     estimatedCalls(timeRange: 72100, numberOfDepartures: 10) {
-      realtime
       expectedArrivalTime
       destinationDisplay {
         frontText
@@ -74,8 +73,8 @@ def human_delta(until=None, *, since=None):
 
     if mins < 1:
         return now_str
-    else:
-        return "{:2} min".format(mins)
+
+    return "{:2} min".format(mins)
 
 
 class Departure(namedtuple("Departure", ["line", "name", "eta", "direction"])):
@@ -159,7 +158,7 @@ def timed_cache(*, expires_sec=60, now=datetime.now):
         @functools.wraps(func)
         def wrapper(*_args, **_kwargs):
             time = now()
-            key = functools._make_key(_args, _kwargs, False)
+            key = functools._make_key(_args, _kwargs, False) # pylint: disable=protected-access
 
             if key not in cache or time > cache[key]["timestamp"] + timedelta(seconds=expires_sec):
                 cache[key] = dict(value=func(*_args, **_kwargs), timestamp=time)
