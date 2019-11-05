@@ -11,6 +11,7 @@ import functools
 import logging
 import re
 import socket
+import sys
 from collections import namedtuple
 from datetime import datetime, timedelta
 
@@ -151,7 +152,7 @@ def timed_cache(*, expires_sec=60, now=datetime.now):
     return decorator
 
 
-def main():
+def main(argv, *, stdout=sys.stdout):
     """Main function for CLI usage"""
     # Parse command line arguments
     import argparse
@@ -169,7 +170,7 @@ def main():
     par.add_argument('--debug', action="store_true",
                      help="enable debug logging")
 
-    args = par.parse_args()
+    args = par.parse_args(argv)
 
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
@@ -198,8 +199,8 @@ def main():
     else:
         raw_stop = get_cached_realtime_stop(stop_id=args.stop_id)
         for dep in parse_departures(raw_stop):
-            print(dep)
+            print(dep, file=stdout)
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
