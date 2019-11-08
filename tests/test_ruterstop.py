@@ -173,3 +173,12 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
 
             actual = filter(None, stdout.getvalue().split('\n')) # remove empty lines
             self.assertEqual(list(actual), self.expected_output)
+
+    def test_adjustable_minimum_time(self):
+        stdout = StringIO()
+
+        with freeze_time(self.first_departure_time):
+            # Call CLI with custom args
+            api.main([None, "--stop-id", "1337", "--min-eta", "2"], stdout=stdout)
+            lines = filter(None, stdout.getvalue().split('\n')) # remove empty lines
+            self.assertEqual(list(lines), self.expected_output[3:]) # skip first 3

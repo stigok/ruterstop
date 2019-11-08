@@ -161,6 +161,8 @@ def main(argv, *, stdout=sys.stdout):
                      help="find stops at https://stoppested.entur.org (guest:guest)")
     par.add_argument('--direction', choices=["inbound", "outbound"],
                      help="filter direction of departures")
+    par.add_argument('--min-eta', type=int, default=0,
+                     help="minimum ETA of departures to return")
     par.add_argument('--server', action="store_true",
                      help="start a HTTP server")
     par.add_argument('--host', type=str, default="0.0.0.0",
@@ -188,7 +190,12 @@ def main(argv, *, stdout=sys.stdout):
 
     def get_departures():
         raw_stop = get_cached_realtime_stop(stop_id=args.stop_id)
-        return parse_departures(raw_stop)
+        deps = parse_departures(raw_stop)
+
+        # Filter departures with minimum time treshold
+        treshold = datetime.now() + timedelta(minutes=args.min_eta)
+
+        return [d for d in deps if d.eta >= treshold]
 
     if args.server:
         @bottle.route("/")
