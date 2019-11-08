@@ -186,19 +186,22 @@ def main(argv, *, stdout=sys.stdout):
     else:
         directions = [args.direction]
 
+    def get_departures():
+        raw_stop = get_cached_realtime_stop(stop_id=args.stop_id)
+        return parse_departures(raw_stop)
+
     if args.server:
         @bottle.route("/")
         def _():
-            raw_stop = get_cached_realtime_stop(stop_id=args.stop_id)
-            deps = parse_departures(raw_stop)
+            deps = get_departures()
             return '\n'.join([str(d) for d in deps if d.direction in directions])
 
         bottle.run(host=args.host, port=args.port)
 
     # Otherwise print out stop information and exit
     else:
-        raw_stop = get_cached_realtime_stop(stop_id=args.stop_id)
-        for dep in parse_departures(raw_stop):
+        deps = get_departures()
+        for dep in deps:
             print(dep, file=stdout)
 
 
