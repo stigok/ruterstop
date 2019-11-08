@@ -168,7 +168,7 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
 
         with freeze_time(self.first_departure_time):
             # Call CLI with custom args
-            api.main(["--stop-id", "1337"], stdout=stdout)
+            api.main([None, "--stop-id", "1337"], stdout=stdout)
             self.patched_get_realtime_stop.assert_called_once_with(stop_id="1337")
 
             actual = filter(None, stdout.getvalue().split('\n')) # remove empty lines

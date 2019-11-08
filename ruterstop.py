@@ -170,7 +170,7 @@ def main(argv, *, stdout=sys.stdout):
     par.add_argument('--debug', action="store_true",
                      help="enable debug logging")
 
-    args = par.parse_args(argv)
+    args = par.parse_args(argv[1:])
 
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
