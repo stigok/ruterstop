@@ -160,10 +160,7 @@ def main(argv, *, stdout=sys.stdout):
     get_cached_realtime_stop = timed_cache(expires_sec=60)(get_realtime_stop)
 
     # Build direction filter list
-    if not args.direction:
-        directions = ["inbound", "outbound"]
-    else:
-        directions = [args.direction]
+    directions = args.direction if args.direction else ["inbound", "outbound"]
 
     def get_departures():
         raw_stop = get_cached_realtime_stop(stop_id=args.stop_id)
