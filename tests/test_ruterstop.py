@@ -182,3 +182,13 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
             api.main([None, "--stop-id", "1337", "--min-eta", "2"], stdout=stdout)
             lines = filter(None, stdout.getvalue().split('\n')) # remove empty lines
             self.assertEqual(list(lines), self.expected_output[3:]) # skip first 3
+
+    def test_direction_arg_is_accounted_for(self):
+        stdout = StringIO()
+        with freeze_time(self.first_departure_time):
+            api.main([None, "--stop-id", "1337", "--direction", "outbound"], stdout=stdout)
+            self.assertNotIn("Tonsenhagen", stdout.getvalue())
+
+            stdout.truncate(0)
+            api.main([None, "--stop-id", "1337", "--direction", "inbound"], stdout=stdout)
+            self.assertNotIn("Majorstuen", stdout.getvalue())
