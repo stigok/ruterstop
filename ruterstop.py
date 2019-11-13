@@ -7,7 +7,6 @@ Norway. Data is requested from the EnTur JourneyPlanner API.
 - Use `--help` for usage info.
 """
 
-import functools
 import logging
 import re
 import socket
@@ -17,6 +16,8 @@ from datetime import datetime, timedelta
 
 import requests
 import bottle
+
+from utils import timed_cache
 
 ENTUR_CLIENT_ID = socket.gethostname()
 ENTUR_GRAPHQL_ENDPOINT = "https://api.entur.io/journey-planner/v2/graphql"
@@ -85,6 +86,7 @@ class Departure(namedtuple("Departure", ["line", "name", "eta", "direction"])):
             self.line, self.name[:11], human_delta(until=self.eta))
 
 
+@timed_cache(expires_sec=60)
 def get_realtime_stop(*, stop_id=None):
     """
     Query EnTur API for realtime stop information.
@@ -125,31 +127,6 @@ def parse_departures(raw_dict, *, date_fmt="%Y-%m-%dT%H:%M:%S%z"):
                 eta=eta,
                 direction=dep["serviceJourney"]["directionType"]
             )
-
-
-def timed_cache(*, expires_sec=60, now=datetime.now):
-    """
-    Decorator function to cache function calls with same arguments for a set
-    amount of time.
-
-    It does not delete any keys from the cache, so it might grow indefinitely.
-    """
-    cache = {}
-
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*_args, **_kwargs):
-            time = now()
-            key = functools._make_key(_args, _kwargs, False) # pylint: disable=protected-access
-
-            if key not in cache or time > cache[key]["timestamp"] + timedelta(seconds=expires_sec):
-                cache[key] = dict(value=func(*_args, **_kwargs), timestamp=time)
-
-            return cache[key]["value"]
-
-        return wrapper
-
-    return decorator
 
 
 def main(argv, *, stdout=sys.stdout):
