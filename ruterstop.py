@@ -129,12 +129,35 @@ def parse_departures(raw_dict, *, date_fmt="%Y-%m-%dT%H:%M:%S%z"):
             )
 
 
+@bottle.route("/<stop_id:int>")
+def get_departures(*, stop_id=None, directions=None, min_eta=0, text=True):
+    """
+    Returns a filtered list of departures. If `text` is True, return stringified
+    departures separated by newlines.
+
+    API calls are cached, so it can be called repeatedly.
+    """
+    raw_stop = get_realtime_stop(stop_id=stop_id)
+    departures = parse_departures(raw_stop)
+
+    # Filter departures with minimum time treshold
+    time_treshold = datetime.now() + timedelta(minutes=min_eta)
+    directions = ["inbound", "outbound"] if not directions else directions
+
+    for dep in departures:
+        if dep.eta >= time_treshold and dep.direction in directions:
+            if text:
+                yield str(dep) + '\n'
+            else:
+                yield dep
+
+
 def main(argv, *, stdout=sys.stdout):
     """Main function for CLI usage"""
     # Parse command line arguments
     import argparse
     par = argparse.ArgumentParser()
-    par.add_argument('--stop-id', required=True,
+    par.add_argument('--stop-id',
                      help="find stops at https://stoppested.entur.org (guest:guest)")
     par.add_argument('--direction', choices=["inbound", "outbound"],
                      help="filter direction of departures")
@@ -156,32 +179,20 @@ def main(argv, *, stdout=sys.stdout):
     else:
         logging.basicConfig(level=logging.INFO)
 
-    # Create a cached function
-    get_cached_realtime_stop = timed_cache(expires_sec=60)(get_realtime_stop)
-
     # Build direction filter list
     directions = args.direction if args.direction else ["inbound", "outbound"]
 
-    def get_departures():
-        raw_stop = get_cached_realtime_stop(stop_id=args.stop_id)
-        deps = parse_departures(raw_stop)
-
-        # Filter departures with minimum time treshold
-        treshold = datetime.now() + timedelta(minutes=args.min_eta)
-
-        return [d for d in deps if d.eta >= treshold]
-
     if args.server:
-        @bottle.route("/")
-        def _():
-            deps = get_departures()
-            return '\n'.join([str(d) for d in deps if d.direction in directions])
-
+        # Start server
         bottle.run(host=args.host, port=args.port)
-
-    # Otherwise print out stop information and exit
     else:
-        deps = get_departures()
+        if not args.stop_id:
+            par.error("stop_id is required when not in server mode")
+            return
+
+        # Just print stop information
+        deps = get_departures(stop_id=args.stop_id, text=False, min_eta=args.min_eta,
+                              directions=directions)
         for dep in deps:
             print(dep, file=stdout)
 
