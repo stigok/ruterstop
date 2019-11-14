@@ -41,6 +41,7 @@ ENTUR_GRAPHQL_QUERY = """
 }
 """
 
+
 def norwegian_ascii(unicode_str):
     """
     Returns an ASCII string with Norwegian chars replaced with their closest

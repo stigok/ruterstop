@@ -6,6 +6,7 @@ from ruterstop import get_departures
 
 import bottle
 
+
 def main(argv=sys.argv, *, stdout=sys.stdout):
     """Main function for CLI usage"""
     # Parse command line arguments
