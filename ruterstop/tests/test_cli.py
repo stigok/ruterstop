@@ -1,12 +1,10 @@
-import inspect
 import json
 import os
-from freezegun import freeze_time
-from datetime import datetime, timedelta
 from io import StringIO
+from unittest import TestCase
+from unittest.mock import patch
 
-import unittest
-from unittest.mock import Mock, MagicMock, patch
+from freezegun import freeze_time
 
 import ruterstop
 
@@ -17,7 +15,7 @@ def run(args):
     lines = out.getvalue().split('\n')
     return lines
 
-class CommandLineInterfaceTestCase(unittest.TestCase):
+class CommandLineInterfaceTestCase(TestCase):
     def setUp(self):
         self.patches = []
 

@@ -1,17 +1,14 @@
 import inspect
 import json
 import os
-from freezegun import freeze_time
 from datetime import datetime, timedelta
-from io import StringIO
-
-import unittest
+from unittest import TestCase
 from unittest.mock import Mock, MagicMock, patch
 
 import ruterstop
 
 
-class HumanDeltaTestCase(unittest.TestCase):
+class HumanDeltaTestCase(TestCase):
     def test_output(self):
         ref = datetime.now()
         testcases = [
@@ -36,7 +33,7 @@ class HumanDeltaTestCase(unittest.TestCase):
             self.assertEqual(mock_date.now.call_count, 1)
 
 
-class DepartureClassTestCase(unittest.TestCase):
+class DepartureClassTestCase(TestCase):
     def test_str_representation(self):
         with patch('ruterstop.datetime') as mock_date:
             ref = datetime.min
@@ -53,7 +50,7 @@ class DepartureClassTestCase(unittest.TestCase):
             self.assertEqual(str(d), "21 longnamelon 77 min")
 
 
-class RuterstopTestCase(unittest.TestCase):
+class RuterstopTestCase(TestCase):
     def setUp(self):
         # Load test data for the external API
         p = os.path.realpath(os.path.dirname(__file__))
