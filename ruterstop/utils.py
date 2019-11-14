@@ -1,5 +1,18 @@
+import re
+
 from datetime import datetime, timedelta
 from functools import wraps, _make_key
+
+
+def norwegian_ascii(unicode_str):
+    """
+    Return an ASCII string with Norwegian chars replaced with their closest
+    ASCII representation. Other non-ASCII characters are ignored and removed.
+    """
+    unicode_str = re.sub(r"ø", "oe", unicode_str, flags=re.IGNORECASE)
+    unicode_str = re.sub(r"æ", "ae", unicode_str, flags=re.IGNORECASE)
+    unicode_str = re.sub(r"å", "aa", unicode_str, flags=re.IGNORECASE)
+    return unicode_str.encode("ascii", "ignore").decode()
 
 
 def timed_cache(*, expires_sec=60, now=datetime.now):

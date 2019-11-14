@@ -9,7 +9,6 @@ Norway. Data is requested from the EnTur JourneyPlanner API.
 
 import argparse
 import logging
-import re
 import socket
 import sys
 from collections import namedtuple
@@ -18,7 +17,7 @@ from datetime import datetime, timedelta
 import requests
 import bottle
 
-from ruterstop.utils import timed_cache
+from ruterstop.utils import norwegian_ascii, timed_cache
 
 ENTUR_CLIENT_ID = socket.gethostname()
 ENTUR_GRAPHQL_ENDPOINT = "https://api.entur.io/journey-planner/v2/graphql"
@@ -41,17 +40,6 @@ ENTUR_GRAPHQL_QUERY = """
   }
 }
 """
-
-
-def norwegian_ascii(unicode_str):
-    """
-    Returns an ASCII string with Norwegian chars replaced with their closest
-    ASCII representation. Other non-ASCII characters are ignored and removed.
-    """
-    unicode_str = re.sub(r"ø", "oe", unicode_str, flags=re.IGNORECASE)
-    unicode_str = re.sub(r"æ", "ae", unicode_str, flags=re.IGNORECASE)
-    unicode_str = re.sub(r"å", "aa", unicode_str, flags=re.IGNORECASE)
-    return unicode_str.encode("ascii", "ignore").decode()
 
 
 def human_delta(until=None, *, since=None):
