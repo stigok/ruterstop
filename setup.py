@@ -8,7 +8,11 @@ setup(
     author="stigok",
     author_email="stig@stigok.com",
     packages=["ruterstop"],
-    scripts=['bin/ruterstop',],
+    entry_points={
+        "console_scripts": [
+            "ruterstop = ruterstop.main:main",
+        ],
+    },
     tests_require=[
         "coverage",
         "freezegun",
