@@ -18,21 +18,14 @@ Trenger Python >=3.5 for å kjøre.
 Last ned kildekoden og installer avhengigheter:
 
 ```
-$ git clone
-$ pip install -r requirements.txt
-```
-
-Installer programmet (hvis du vil):
-
-```
-# python setup.py install
+$ python setup.py install
 ```
 
 Kjør programmet med et valgt stoppested. *6013* er Stig, på Årvoll i Oslo.
 Søk opp flere stopp fra [EnTur sine sider for stoppesteder][stoppesteder].
 
 ```
-$ python ruterstop.py --stop-id 6013 --direction outbound
+$ ruterstop --stop-id 6013 --direction outbound
 31 Snaroeya       naa
 31 Fornebu      5 min
 25 Majorstuen   6 min
