@@ -2,6 +2,7 @@ from setuptools import setup
 
 setup(
     name='ruterstop',
+    description="Et program som viser sanntidsinformasjon for stoppesteder i Oslo og Akershus.",
     version='0.0.1',
     url="https://github.com/stigok/ruterstop",
     author="stigok",
