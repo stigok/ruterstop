@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 import requests
 import bottle
 
-from utils import timed_cache
+from .utils import timed_cache
 
 ENTUR_CLIENT_ID = socket.gethostname()
 ENTUR_GRAPHQL_ENDPOINT = "https://api.entur.io/journey-planner/v2/graphql"
@@ -150,52 +150,3 @@ def get_departures(*, stop_id=None, directions=None, min_eta=0, text=True):
                 yield str(dep) + '\n'
             else:
                 yield dep
-
-
-def main(argv, *, stdout=sys.stdout):
-    """Main function for CLI usage"""
-    # Parse command line arguments
-    import argparse
-    par = argparse.ArgumentParser()
-    par.add_argument('--stop-id',
-                     help="find stops at https://stoppested.entur.org (guest:guest)")
-    par.add_argument('--direction', choices=["inbound", "outbound"],
-                     help="filter direction of departures")
-    par.add_argument('--min-eta', type=int, default=0,
-                     help="minimum ETA of departures to return")
-    par.add_argument('--server', action="store_true",
-                     help="start a HTTP server")
-    par.add_argument('--host', type=str, default="0.0.0.0",
-                     help="HTTP server hostname")
-    par.add_argument('--port', type=int, default=4000,
-                     help="HTTP server listen port")
-    par.add_argument('--debug', action="store_true",
-                     help="enable debug logging")
-
-    args = par.parse_args(argv[1:])
-
-    if args.debug:
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
-
-    # Build direction filter list
-    directions = args.direction if args.direction else ["inbound", "outbound"]
-
-    if args.server:
-        # Start server
-        bottle.run(host=args.host, port=args.port)
-    else:
-        if not args.stop_id:
-            par.error("stop_id is required when not in server mode")
-            return
-
-        # Just print stop information
-        deps = get_departures(stop_id=args.stop_id, text=False, min_eta=args.min_eta,
-                              directions=directions)
-        for dep in deps:
-            print(dep, file=stdout)
-
-
-if __name__ == "__main__":
-    main(sys.argv)
