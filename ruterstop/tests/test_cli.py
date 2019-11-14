@@ -8,12 +8,12 @@ from io import StringIO
 import unittest
 from unittest.mock import Mock, MagicMock, patch
 
-import ruterstop as api
+import ruterstop
 from ruterstop import main
 
 def run(args):
     out = StringIO()
-    api.main.main(['TEST'] + args, stdout=out)
+    ruterstop.main.main(['TEST'] + args, stdout=out)
     lines = out.getvalue().split('\n')
     return lines
 
@@ -29,7 +29,7 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
             self.patched_get_realtime_stop = patcher.start()
 
             # Get the time of the first departure to use as reference for tests
-            first_departure = list(api.parse_departures(departure_data))[0]
+            first_departure = list(ruterstop.parse_departures(departure_data))[0]
             self.first_departure_time = first_departure.eta
 
         # This is highly dependent on the test data
