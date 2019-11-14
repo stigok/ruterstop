@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 import requests
 import bottle
 
-from utils import timed_cache
+from .utils import timed_cache
 
 ENTUR_CLIENT_ID = socket.gethostname()
 ENTUR_GRAPHQL_ENDPOINT = "https://api.entur.io/journey-planner/v2/graphql"
