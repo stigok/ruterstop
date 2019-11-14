@@ -9,12 +9,11 @@ import unittest
 from unittest.mock import Mock, MagicMock, patch
 
 import ruterstop
-from ruterstop import main
 
 
 def run(args):
     out = StringIO()
-    ruterstop.main.main(['TEST'] + args, stdout=out)
+    ruterstop.main(['TEST'] + args, stdout=out)
     lines = out.getvalue().split('\n')
     return lines
 
