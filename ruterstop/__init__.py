@@ -184,3 +184,7 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
                               directions=directions)
         for dep in deps:
             print(dep, file=stdout)
+
+
+if __name__ == "__main__":
+    main()
