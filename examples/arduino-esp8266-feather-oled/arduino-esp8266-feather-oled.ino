@@ -25,7 +25,7 @@ Adafruit_SSD1306 display(OLED_RESET);
 
 const char* ssid = STASSID;
 const char* password = STAPSK;
-const char* url = "http://192.168.0.7:4000/";
+const char* url = "http://192.168.0.7:4000/6013"; // Stig
 
 WiFiClient client;
 HTTPClient http;
