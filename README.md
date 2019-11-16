@@ -33,6 +33,31 @@ $ ruterstop --stop-id 6013 --direction outbound
 25 Majorstuen   8 min
 ```
 
+Eller start som en HTTP server.
+
+```
+$ ruterstop --server
+```
+
+Stoppested velges da i adressen til spørringen.
+
+```
+$ curl -i localhost:4000/6013
+HTTP/1.0 200 OK
+Date: Sat, 16 Nov 2019 17:09:48 GMT
+Server: WSGIServer/0.2 CPython/3.7.5
+Content-Type: text/html; charset=UTF-8
+
+25 Loerenskog     naa
+31 Grorud T     1 min
+31 Snaroeya     2 min
+31 Tonsenhagen  7 min
+31 Fornebu      8 min
+25 Majorstuen   8 min
+31 Snaroeya    14 min
+31 Grorud T    14 min
+```
+
 ## Motivasjon
 
 Jeg fikk et ønske om å kunne se avganger fra mitt nærmeste stoppested mens
