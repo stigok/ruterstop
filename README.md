@@ -3,8 +3,8 @@
 Et program som viser sanntidsinformasjon for stoppesteder i Oslo og Akershus.
 
 - Lister opp de neste 10 avgangene
-- Starter en HTTP server med `--server`
 - Velg en bestemt kjøreretning med `--direction`
+- Starter en HTTP server med `--server`
 - Bruk `--help` for full hjelp
 
 Innspill, tanker og feilmeldinger mottas med glede!
@@ -33,6 +33,31 @@ $ ruterstop --stop-id 6013 --direction outbound
 25 Majorstuen   8 min
 ```
 
+Eller start som en HTTP server.
+
+```
+$ ruterstop --server
+```
+
+Stoppested velges da i adressen til spørringen.
+
+```
+$ curl -i localhost:4000/6013
+HTTP/1.0 200 OK
+Date: Sat, 16 Nov 2019 17:09:48 GMT
+Server: WSGIServer/0.2 CPython/3.7.5
+Content-Type: text/html; charset=UTF-8
+
+25 Loerenskog     naa
+31 Grorud T     1 min
+31 Snaroeya     2 min
+31 Tonsenhagen  7 min
+31 Fornebu      8 min
+25 Majorstuen   8 min
+31 Snaroeya    14 min
+31 Grorud T    14 min
+```
+
 ## Motivasjon
 
 Jeg fikk et ønske om å kunne se avganger fra mitt nærmeste stoppested mens
@@ -40,8 +65,12 @@ jeg sitter ved kjøkkenbordet, uten å måtte bruke mobilen.
 Jeg skrev dette programmet som en backend til en ESP8266-variant med en
 OLED skjerm.
 
-Fungerende kode for en Adafruit Feather HUZZAH ESP8266 med en OLED FeatherWing
-finnes i [eksempel-mappen](./examples/arduino-esp8266-feather-oled).
+Jeg bruker dette prosjektet til å utnytte alle ting jeg kan kom Python, og
+prøver ut ting jeg ikke har gjort før, som f.eks. å pakke det sammen med
+`setuptools`.
+
+Fungerende klient-kode for en Adafruit Feather HUZZAH ESP8266 med en OLED
+FeatherWing finnes i [eksempel-mappen](./examples/arduino-esp8266-feather-oled).
 
 ## Referanser og linker
 - [Søk etter stoppesteder][stoppesteder] (Logg inn med guest:guest)
