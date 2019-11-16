@@ -3,8 +3,8 @@
 Et program som viser sanntidsinformasjon for stoppesteder i Oslo og Akershus.
 
 - Lister opp de neste 10 avgangene
-- Starter en HTTP server med `--server`
 - Velg en bestemt kjøreretning med `--direction`
+- Starter en HTTP server med `--server`
 - Bruk `--help` for full hjelp
 
 Innspill, tanker og feilmeldinger mottas med glede!
