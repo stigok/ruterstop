@@ -65,8 +65,12 @@ jeg sitter ved kjøkkenbordet, uten å måtte bruke mobilen.
 Jeg skrev dette programmet som en backend til en ESP8266-variant med en
 OLED skjerm.
 
-Fungerende kode for en Adafruit Feather HUZZAH ESP8266 med en OLED FeatherWing
-finnes i [eksempel-mappen](./examples/arduino-esp8266-feather-oled).
+Jeg bruker dette prosjektet til å utnytte alle ting jeg kan kom Python, og
+prøver ut ting jeg ikke har gjort før, som f.eks. å pakke det sammen med
+`setuptools`.
+
+Fungerende klient-kode for en Adafruit Feather HUZZAH ESP8266 med en OLED
+FeatherWing finnes i [eksempel-mappen](./examples/arduino-esp8266-feather-oled).
 
 ## Referanser og linker
 - [Søk etter stoppesteder][stoppesteder] (Logg inn med guest:guest)
