@@ -14,7 +14,6 @@ setup(
         ],
     },
     tests_require=[
-        "coverage",
         "freezegun",
     ],
     install_requires=[
