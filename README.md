@@ -15,13 +15,20 @@ Innspill, tanker og feilmeldinger mottas med glede!
 
 Trenger Python >=3.5 for å kjøre.
 
-Last ned kildekoden og installer avhengigheter:
+Last ned kildekoden og installer programmet med avhengigheter fra kildekodemappen
 
 ```
-$ python setup.py install
+$ pip install .
 ```
 
-Kjør programmet med et valgt stoppested. *6013* er Stig, på Årvoll i Oslo.
+**eller** installer avhengighetene og kjør programmet uten å installere
+
+```
+$ pip install -r requirements.txt
+$ python ruterstop/
+```
+
+Kjør programmet med et valgt stoppested. *6013* er Stig, på Årvoll, i Oslo.
 Søk opp flere stopp fra [EnTur sine sider for stoppesteder][stoppesteder].
 
 ```
