@@ -1,23 +1,21 @@
-import inspect
 import json
 import os
-from freezegun import freeze_time
-from datetime import datetime, timedelta
 from io import StringIO
+from unittest import TestCase
+from unittest.mock import patch
 
-import unittest
-from unittest.mock import Mock, MagicMock, patch
+from freezegun import freeze_time
 
-import ruterstop as api
-from ruterstop import main
+import ruterstop
+
 
 def run(args):
     out = StringIO()
-    api.main.main(['TEST'] + args, stdout=out)
+    ruterstop.main(['TEST'] + args, stdout=out)
     lines = out.getvalue().split('\n')
     return lines
 
-class CommandLineInterfaceTestCase(unittest.TestCase):
+class CommandLineInterfaceTestCase(TestCase):
     def setUp(self):
         self.patches = []
 
@@ -29,7 +27,7 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
             self.patched_get_realtime_stop = patcher.start()
 
             # Get the time of the first departure to use as reference for tests
-            first_departure = list(api.parse_departures(departure_data))[0]
+            first_departure = list(ruterstop.parse_departures(departure_data))[0]
             self.first_departure_time = first_departure.eta
 
         # This is highly dependent on the test data

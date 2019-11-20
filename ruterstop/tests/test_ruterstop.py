@@ -1,17 +1,14 @@
 import inspect
 import json
 import os
-from freezegun import freeze_time
 from datetime import datetime, timedelta
-from io import StringIO
-
-import unittest
+from unittest import TestCase
 from unittest.mock import Mock, MagicMock, patch
 
-import ruterstop as api
+import ruterstop
 
 
-class HumanDeltaTestCase(unittest.TestCase):
+class HumanDeltaTestCase(TestCase):
     def test_output(self):
         ref = datetime.now()
         testcases = [
@@ -26,17 +23,17 @@ class HumanDeltaTestCase(unittest.TestCase):
 
         for i, case in enumerate(testcases):
             val, expected = case
-            res = api.human_delta(until=val, since=ref)
+            res = ruterstop.human_delta(until=val, since=ref)
             self.assertEqual(res, expected, "test case #%d" % (i + 1))
 
     def test_default_kwarg_value(self):
         with patch('ruterstop.datetime') as mock_date:
             mock_date.now.return_value = datetime.min
-            api.human_delta(until=datetime.min + timedelta(seconds=120))
+            ruterstop.human_delta(until=datetime.min + timedelta(seconds=120))
             self.assertEqual(mock_date.now.call_count, 1)
 
 
-class DepartureClassTestCase(unittest.TestCase):
+class DepartureClassTestCase(TestCase):
     def test_str_representation(self):
         with patch('ruterstop.datetime') as mock_date:
             ref = datetime.min
@@ -45,15 +42,15 @@ class DepartureClassTestCase(unittest.TestCase):
             in_77_mins = ref + timedelta(minutes=77)
 
             # Test valid representation
-            d = api.Departure(line=21, name="twentyone", eta=in_7_mins, direction="o")
+            d = ruterstop.Departure(line=21, name="twentyone", eta=in_7_mins, direction="o")
             self.assertEqual(str(d), "21 twentyone    7 min")
 
             # Test long name trimming
-            d = api.Departure(line=21, name="longname" * 3, eta=in_77_mins, direction="o")
+            d = ruterstop.Departure(line=21, name="longname" * 3, eta=in_77_mins, direction="o")
             self.assertEqual(str(d), "21 longnamelon 77 min")
 
 
-class RuterstopTestCase(unittest.TestCase):
+class RuterstopTestCase(TestCase):
     def setUp(self):
         # Load test data for the external API
         p = os.path.realpath(os.path.dirname(__file__))
@@ -70,12 +67,12 @@ class RuterstopTestCase(unittest.TestCase):
 
         for i, case in enumerate(testcases):
             val, expected = case
-            res = api.norwegian_ascii(val)
+            res = ruterstop.norwegian_ascii(val)
             self.assertEqual(res, expected, "test case #%d" % (i + 1))
 
     def test_get_realtime_stop(self):
         with patch('requests.post') as mock:
-            api.get_realtime_stop(stop_id=1337)
+            ruterstop.get_realtime_stop(stop_id=1337)
             self.assertEqual(mock.call_count, 1)
             _, kwargs = mock.call_args
 
@@ -84,14 +81,14 @@ class RuterstopTestCase(unittest.TestCase):
             self.assertIsNotNone(kwargs.get("timeout"))
 
     def test_parse_departures(self):
-        self.assertTrue(inspect.isgeneratorfunction(api.parse_departures))
+        self.assertTrue(inspect.isgeneratorfunction(ruterstop.parse_departures))
 
-        res = api.parse_departures(self.raw_departure_data)
+        res = ruterstop.parse_departures(self.raw_departure_data)
 
         i = 0
         for d in res:
             i += 1
-            self.assertIsInstance(d, api.Departure)
+            self.assertIsInstance(d, ruterstop.Departure)
             self.assertIsNotNone(d.line)
             self.assertIsNotNone(d.name)
             self.assertIsNotNone(d.eta)
@@ -102,7 +99,7 @@ class RuterstopTestCase(unittest.TestCase):
         now = MagicMock()
         spy = Mock(return_value=1) # don't need return value
 
-        @api.timed_cache(expires_sec=60, now=now)
+        @ruterstop.timed_cache(expires_sec=60, now=now)
         def func(a, b=None):
             spy() # for counting calls
             return [a, b] # return list to compare references

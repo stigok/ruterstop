@@ -10,11 +10,10 @@ setup(
     packages=["ruterstop"],
     entry_points={
         "console_scripts": [
-            "ruterstop = ruterstop.main:main",
+            "ruterstop = ruterstop:main",
         ],
     },
     tests_require=[
-        "coverage",
         "freezegun",
     ],
     install_requires=[
