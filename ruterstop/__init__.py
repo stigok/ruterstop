@@ -9,6 +9,7 @@ Norway. Data is requested from the EnTur JourneyPlanner API.
 
 import argparse
 import logging
+import os
 import socket
 import sys
 from collections import namedtuple
