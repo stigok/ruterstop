@@ -9,6 +9,7 @@ Norway. Data is requested from the EnTur JourneyPlanner API.
 
 import argparse
 import logging
+import os
 import socket
 import sys
 from collections import namedtuple
@@ -145,7 +146,7 @@ def get_departures(*, stop_id=None, directions=None, min_eta=0, text=True):
 def main(argv=sys.argv, *, stdout=sys.stdout):
     """Main function for CLI usage"""
     # Parse command line arguments
-    par = argparse.ArgumentParser()
+    par = argparse.ArgumentParser(prog="ruterstop")
     par.add_argument('--stop-id',
                      help="find stops at https://stoppested.entur.org (guest:guest)")
     par.add_argument('--direction', choices=["inbound", "outbound"],
