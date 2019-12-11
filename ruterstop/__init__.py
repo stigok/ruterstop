@@ -134,6 +134,23 @@ def parse_departures(raw_dict, *, date_fmt="%Y-%m-%dT%H:%M:%S%z"):
 
 
 @webapp.route("/<stop_id:int>")
+def get_departures_proxy(*args, **kwargs):
+    """
+    A proxy function for get_departures to make get_departures mock-/patchable
+    even after decorated by bottle.
+    Calls get_departures with whitelisted kwargs defined in the querystring of
+    the current web request.
+    """
+    q = bottle.request.query
+
+    if q.direction:
+        kwargs["directions"] = q.direction
+    if q.min_eta:
+        kwargs["min_eta"] = int(q.min_eta)
+
+    return get_departures(*args, **kwargs)
+
+
 def get_departures(*, stop_id=None, directions=None, min_eta=0, text=True):
     """
     Returns a filtered list of departures. If `text` is True, return stringified
