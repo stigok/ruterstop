@@ -8,7 +8,7 @@ first function called in get_departures, and use that to e.g. raise Exceptions
 as a side-effect.
 """
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from webtest import TestApp
 
@@ -37,15 +37,19 @@ class WebAppTestCase(TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertTrue(str(res.body).count('\n') <= 1) # a single line of text
         self.assertEqual(res.body, "Ugyldig stoppested".encode())
+        self.assertEqual(mock.call_count, 0)
 
-    def test_simple_500_error(self):
-        with patch('ruterstop.get_realtime_stop') as mock:
-            mock.side_effect = Exception("Trigger a 500")
+    @patch("ruterstop.get_departures", return_value=None)
+    def test_simple_500_error(self, mock):
+        mock.side_effect = Exception("barf")
+        res = self.app.get("/1234", expect_errors=True)
+        self.assertEqual(res.content_type, "text/plain")
+        self.assertEqual(res.status_code, 500)
+        self.assertEqual(res.body, "Feil på serveren".encode())
+        self.assertEqual(mock.call_count, 1)
 
-            res = self.app.get('/1234', expect_errors=True)
-            mock.assert_called_once()
-
-            self.assertEqual(res.content_type, 'text/plain')
-            self.assertEqual(res.status_code, 500)
-            self.assertTrue(str(res.body).count('\n') <= 1) # a single line of text
-            self.assertEqual(res.body, "Feil på serveren".encode())
+    @patch("ruterstop.get_departures", return_value=None)
+    def test_calls_api_with_querystring_params(self, mock):
+        self.app.get("/1234?direction=inbound&min_eta=5&bogusargs=1337")
+        mock.assert_called_once_with(stop_id=1234, directions="inbound",
+                                     min_eta=5)
