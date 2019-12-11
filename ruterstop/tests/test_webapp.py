@@ -1,12 +1,3 @@
-"""
-Note for webtest and bottle:
-Even though I'd ideally want to mock ruterstop.get_departures, that function
-is decorated with @bottle.get() on import-time, consequently wrapping the
-underlying function before it is patched/mocked.
-A work-around for this is to mock get_realtime_stop instead, as it is the
-first function called in get_departures, and use that to e.g. raise Exceptions
-as a side-effect.
-"""
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
@@ -24,18 +15,16 @@ class WebAppTestCase(TestCase):
         self.app.reset()
         pass
 
-    # The patchability of this module isn't great for this kind of test
-    @patch('ruterstop.get_realtime_stop', return_value={"data": "foobar"})
-    @patch('ruterstop.parse_departures', returl_value=[])
-    def test_calls_api_on_proper_path(self, parse_departures, get_realtime_stop):
-        res = self.app.get('/1234')
-        get_realtime_stop.assert_called_once_with(stop_id=1234)
+    @patch("ruterstop.get_departures", return_value=None)
+    def test_calls_api_on_proper_path(self, mock):
+        res = self.app.get("/1234")
+        mock.assert_called_once_with(stop_id=1234)
 
-    def test_simple_404_error(self):
-        res = self.app.get('/', expect_errors=True)
-        self.assertEqual(res.content_type, 'text/plain')
+    @patch("ruterstop.get_departures", return_value=None)
+    def test_simple_404_error(self, mock):
+        res = self.app.get("/", expect_errors=True)
+        self.assertEqual(res.content_type, "text/plain")
         self.assertEqual(res.status_code, 404)
-        self.assertTrue(str(res.body).count('\n') <= 1) # a single line of text
         self.assertEqual(res.body, "Ugyldig stoppested".encode())
         self.assertEqual(mock.call_count, 0)
 
