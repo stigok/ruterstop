@@ -42,6 +42,19 @@ ENTUR_GRAPHQL_QUERY = """
 }
 """
 
+webapp = bottle.Bottle()
+
+def not_found_error_handler(res):
+    res.content_type = "text/plain"
+    return "Ugyldig stoppested"
+
+webapp.error(code=404)(not_found_error_handler)
+
+def default_error_handler(res):
+    res.content_type = "text/plain"
+    return "Feil på serveren"
+
+webapp.default_error_handler = default_error_handler
 
 def human_delta(until=None, *, since=None):
     """
@@ -120,7 +133,7 @@ def parse_departures(raw_dict, *, date_fmt="%Y-%m-%dT%H:%M:%S%z"):
             )
 
 
-@bottle.route("/<stop_id:int>")
+@webapp.route("/<stop_id:int>")
 def get_departures(*, stop_id=None, directions=None, min_eta=0, text=True):
     """
     Returns a filtered list of departures. If `text` is True, return stringified
@@ -174,7 +187,7 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
 
     if args.server:
         # Start server
-        bottle.run(host=args.host, port=args.port)
+        bottle.run(webapp, host=args.host, port=args.port)
     else:
         if not args.stop_id:
             par.error("stop_id is required when not in server mode")
