@@ -15,7 +15,6 @@ from webtest import TestApp
 import ruterstop
 
 
-
 class WebAppTestCase(TestCase):
     def setUp(self):
         self.app = TestApp(ruterstop.webapp)
@@ -24,6 +23,13 @@ class WebAppTestCase(TestCase):
     def tearDown(self):
         self.app.reset()
         pass
+
+    # The patchability of this module isn't great for this kind of test
+    @patch('ruterstop.get_realtime_stop', return_value={"data": "foobar"})
+    @patch('ruterstop.parse_departures', returl_value=[])
+    def test_calls_api_on_proper_path(self, parse_departures, get_realtime_stop):
+        res = self.app.get('/1234')
+        get_realtime_stop.assert_called_once_with(stop_id=1234)
 
     def test_simple_404_error(self):
         res = self.app.get('/', expect_errors=True)
