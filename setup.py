@@ -15,6 +15,7 @@ setup(
     },
     tests_require=[
         "freezegun",
+        "webtest",
     ],
     install_requires=[
         "bottle",
