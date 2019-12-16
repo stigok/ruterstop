@@ -159,18 +159,24 @@ def get_departures(*, stop_id=None, directions=None, min_eta=0, text=True):
     API calls are cached, so it can be called repeatedly.
     """
     raw_stop = get_realtime_stop(stop_id=stop_id)
-    departures = parse_departures(raw_stop)
+    return parse_departures(raw_stop)
+
+
+def format_departure_list(departures, *, min_eta=0, directions=None, grouped=False):
+    deps = (d for d in departures)
+
+    # Filter on directions
+    directions = ["inbound", "outbound"] if not directions else directions
+    deps = filter(lambda d: d.direction in directions, deps)
 
     # Filter departures with minimum time treshold
     time_treshold = datetime.now() + timedelta(minutes=min_eta)
-    directions = ["inbound", "outbound"] if not directions else directions
+    deps = filter(lambda d: d.eta >= time_treshold, deps)
 
-    for dep in departures:
-        if dep.eta >= time_treshold and dep.direction in directions:
-            if text:
-                yield str(dep) + '\n'
-            else:
-                yield dep
+    s = ""
+    for dep in deps:
+        s += str(dep) + '\n'
+    return s
 
 
 def main(argv=sys.argv, *, stdout=sys.stdout):
@@ -211,10 +217,11 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
             return
 
         # Just print stop information
-        deps = get_departures(stop_id=args.stop_id, text=False, min_eta=args.min_eta,
-                              directions=directions)
-        for dep in deps:
-            print(dep, file=stdout)
+        deps = get_departures(stop_id=args.stop_id, text=False)
+        formatted = format_departure_list(deps, min_eta=args.min_eta,
+                                          directions=directions)
+
+        print(formatted, file=stdout)
 
 
 if __name__ == "__main__":
