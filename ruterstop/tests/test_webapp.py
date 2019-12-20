@@ -15,10 +15,12 @@ class WebAppTestCase(TestCase):
         self.app.reset()
         pass
 
-    @patch("ruterstop.get_departures", return_value=None)
-    def test_calls_api_on_proper_path(self, mock):
+    @patch("ruterstop.format_departure_list", return_value=None)
+    @patch("ruterstop.get_departures", return_value=dict(a="foo"))
+    def test_calls_api_on_proper_path(self, get_mock, format_mock):
         res = self.app.get("/1234")
-        mock.assert_called_once_with(stop_id=1234)
+        get_mock.assert_called_once_with(stop_id=1234)
+        format_mock.assert_called_once_with(dict(a="foo"))
 
     @patch("ruterstop.get_departures", return_value=None)
     def test_simple_404_error(self, mock):
@@ -37,8 +39,11 @@ class WebAppTestCase(TestCase):
         self.assertEqual(res.body, "Feil på serveren".encode())
         self.assertEqual(mock.call_count, 1)
 
-    @patch("ruterstop.get_departures", return_value=None)
-    def test_calls_api_with_querystring_params(self, mock):
+    @patch("ruterstop.format_departure_list", return_value=None)
+    @patch("ruterstop.get_departures", return_value=dict(a="foo"))
+    def test_calls_api_with_querystring_params(self, get_mock, format_mock):
         self.app.get("/1234?direction=inbound&min_eta=5&bogusargs=1337")
-        mock.assert_called_once_with(stop_id=1234, directions="inbound",
-                                     min_eta=5)
+        get_mock.assert_called_once_with(stop_id=1234)
+        format_mock.assert_called_once_with(dict(a="foo"),
+                                            directions="inbound",
+                                            min_eta=5)

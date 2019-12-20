@@ -57,3 +57,35 @@ class RuterstopTestCase(TestCase):
             self.assertIsNotNone(d.eta)
             self.assertIsNotNone(d.direction)
         self.assertNotEqual(i, 0, "no items were returned")
+
+    @patch("ruterstop.get_realtime_stop", return_value=None)
+    def test_groups_output_when_grouped_enabled(self, _):
+        now = datetime.now()
+        in0min = now + timedelta(seconds=1)
+        in1min = now + timedelta(minutes=1)
+        in2min = now + timedelta(minutes=2, seconds=1)
+        in3min = now + timedelta(minutes=3, seconds=1)
+        in4min = now + timedelta(minutes=4, seconds=1)
+
+        # Build list of fake departures
+        deps = []
+        deps.append(ruterstop.Departure("01", "Zero", in0min, "inbound"))
+        deps.append(ruterstop.Departure("10", "Ones", in1min, "inbound"))
+        deps.append(ruterstop.Departure("11", "Ones", in1min, "inbound"))
+        deps.append(ruterstop.Departure("12", "Ones", in1min, "inbound"))
+        deps.append(ruterstop.Departure("20", "Twos", in2min, "inbound"))
+        deps.append(ruterstop.Departure("21", "Twos", in2min, "inbound"))
+        deps.append(ruterstop.Departure("21", "Thre", in3min, "inbound"))
+        deps.append(ruterstop.Departure("21", "Four", in4min, "inbound"))
+
+        output = StringIO()
+        args = " --stop-id=2121 --direction=inbound --grouped".split(' ')
+
+        # Use the fake departure list in this patch
+        with patch("ruterstop.parse_departures", return_value=deps) as mock:
+            ruterstop.main(args, stdout=output)
+            lines = output.getvalue().split('\n')
+            self.assertEqual(lines[0], "01, 10, 11, 12    naa")
+            self.assertEqual(lines[1], "20, 21          2 min")
+            self.assertEqual(lines[2], "21 Thre         3 min")
+            self.assertEqual(lines[3], "21 Four         4 min")
