@@ -182,7 +182,7 @@ def format_departure_list(departures, *, min_eta=0, directions=None, grouped=Fal
     # Group departures with same departure time
     # TODO: The check for whether directions has filter might need more work
     if grouped and dirs:
-        # Group by by ETA value
+        # Group by ETA value
         keyed = defaultdict(list)
         for dep in deps:
             keyed[human_delta(dep.eta)].append(dep)
