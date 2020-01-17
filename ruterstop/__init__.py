@@ -12,7 +12,7 @@ import logging
 import os
 import socket
 import sys
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from datetime import datetime, timedelta
 
 import requests
@@ -86,8 +86,10 @@ def human_delta(until=None, *, since=None):
 class Departure(namedtuple("Departure", ["line", "name", "eta", "direction"])):
     """Represents a transport departure"""
     def __str__(self):
-        return "{:2} {:11}{:>7}".format(
-            self.line, self.name[:11], human_delta(until=self.eta))
+        name = str(self.line)
+        if self.name:
+            name += " " + self.name
+        return "{:14}{:>7}".format(name[:14], human_delta(until=self.eta))
 
 
 @timed_cache(expires_sec=60)
@@ -134,43 +136,75 @@ def parse_departures(raw_dict, *, date_fmt="%Y-%m-%dT%H:%M:%S%z"):
 
 
 @webapp.route("/<stop_id:int>")
-def get_departures_proxy(*args, **kwargs):
+def serve_departures(stop_id):
     """
-    A proxy function for get_departures to make get_departures mock-/patchable
-    even after decorated by bottle.
-    Calls get_departures with whitelisted kwargs defined in the querystring of
-    the current web request.
+    Responds to web requests by turning whitelisted querystring values into
+    kwargs passed on to format_departure_list.
     """
     q = bottle.request.query
+    kw = dict()
 
     if q.direction:
-        kwargs["directions"] = q.direction
+        kw["directions"] = q.direction
     if q.min_eta:
-        kwargs["min_eta"] = int(q.min_eta)
+        kw["min_eta"] = int(q.min_eta)
+    if q.grouped:
+        kw["grouped"] = True
 
-    return get_departures(*args, **kwargs)
+    deps = get_departures(stop_id=stop_id)
+    return format_departure_list(deps, **kw)
 
 
-def get_departures(*, stop_id=None, directions=None, min_eta=0, text=True):
+def get_departures(*, stop_id=None):
     """
-    Returns a filtered list of departures. If `text` is True, return stringified
-    departures separated by newlines.
+    Returns a list of Departure objects.
 
-    API calls are cached, so it can be called repeatedly.
+    Upstream API calls are cached, so it can be called repeatedly.
     """
     raw_stop = get_realtime_stop(stop_id=stop_id)
-    departures = parse_departures(raw_stop)
+    return parse_departures(raw_stop)
+
+
+def format_departure_list(departures, *, min_eta=0, directions=None, grouped=False):
+    """
+    Filters and groups departures based on arguments passed.
+    """
+    deps = (d for d in departures)
+
+    # Filter on directions
+    dirs = ["inbound", "outbound"] if not directions else directions
+    deps = filter(lambda d: d.direction in dirs, deps)
 
     # Filter departures with minimum time treshold
     time_treshold = datetime.now() + timedelta(minutes=min_eta)
-    directions = ["inbound", "outbound"] if not directions else directions
+    deps = filter(lambda d: d.eta >= time_treshold, deps)
 
-    for dep in departures:
-        if dep.eta >= time_treshold and dep.direction in directions:
-            if text:
-                yield str(dep) + '\n'
-            else:
-                yield dep
+    # Group departures with same departure time
+    # TODO: The check for whether directions has filter might need more work
+    if grouped and dirs:
+        # Group by ETA value
+        keyed = defaultdict(list)
+        for dep in deps:
+            keyed[human_delta(dep.eta)].append(dep)
+
+        # Build string output
+        newdeps = list()
+        for eta, deps in keyed.items():
+            # Print single departures normally
+            if len(deps) == 1:
+                newdeps.append(deps[0])
+                continue
+
+            newdeps.append(Departure(line=", ".join([d.line for d in deps]),
+                                     name="", eta=deps[0].eta,
+                                     direction=deps[0].direction))
+        deps = newdeps
+
+    # Create pretty output
+    s = ""
+    for dep in deps:
+        s += str(dep) + '\n'
+    return s
 
 
 def main(argv=sys.argv, *, stdout=sys.stdout):
@@ -183,6 +217,9 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
                      help="filter direction of departures")
     par.add_argument('--min-eta', type=int, default=0,
                      help="minimum ETA of departures to return")
+    par.add_argument('--grouped', action="store_true",
+                     help="group departures with same ETA together" +
+                          "when --direction is specified.")
     par.add_argument('--server', action="store_true",
                      help="start a HTTP server")
     par.add_argument('--host', type=str, default="0.0.0.0",
@@ -211,10 +248,12 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
             return
 
         # Just print stop information
-        deps = get_departures(stop_id=args.stop_id, text=False, min_eta=args.min_eta,
-                              directions=directions)
-        for dep in deps:
-            print(dep, file=stdout)
+        deps = get_departures(stop_id=args.stop_id)
+        formatted = format_departure_list(deps, min_eta=args.min_eta,
+                                          directions=directions,
+                                          grouped=args.grouped)
+
+        print(formatted, file=stdout)
 
 
 if __name__ == "__main__":

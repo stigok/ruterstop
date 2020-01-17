@@ -2,35 +2,11 @@ import inspect
 import json
 import os
 from datetime import datetime, timedelta
+from io import StringIO
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock, patch
 
 import ruterstop
-
-
-class HumanDeltaTestCase(TestCase):
-    def test_output(self):
-        ref = datetime.now()
-        testcases = [
-            (ref - timedelta(seconds=20),  "   naa"),
-            (ref + timedelta(seconds=20),  "   naa"),
-            (ref + timedelta(minutes=1),   " 1 min"),
-            (ref + timedelta(seconds=100), " 1 min"),
-            (ref + timedelta(minutes=2),   " 2 min"),
-            (ref + timedelta(minutes=10),  "10 min"),
-            (ref + timedelta(hours=100),   "99 min")
-        ]
-
-        for i, case in enumerate(testcases):
-            val, expected = case
-            res = ruterstop.human_delta(until=val, since=ref)
-            self.assertEqual(res, expected, "test case #%d" % (i + 1))
-
-    def test_default_kwarg_value(self):
-        with patch('ruterstop.datetime') as mock_date:
-            mock_date.now.return_value = datetime.min
-            ruterstop.human_delta(until=datetime.min + timedelta(seconds=120))
-            self.assertEqual(mock_date.now.call_count, 1)
 
 
 class DepartureClassTestCase(TestCase):
@@ -57,19 +33,6 @@ class RuterstopTestCase(TestCase):
         with open(os.path.join(p, 'test_data.json')) as fp:
             self.raw_departure_data = json.load(fp)
 
-    def test_norwegian_ascii(self):
-        testcases = [
-            ("Snarøya",              "Snaroeya"),
-            ("Ås",                   "aas"),
-            ("Ærlig",                "aerlig"),
-            ("Voçé não gosta Açaí?", "Vo no gosta Aa?")
-        ]
-
-        for i, case in enumerate(testcases):
-            val, expected = case
-            res = ruterstop.norwegian_ascii(val)
-            self.assertEqual(res, expected, "test case #%d" % (i + 1))
-
     def test_get_realtime_stop(self):
         with patch('requests.post') as mock:
             ruterstop.get_realtime_stop(stop_id=1337)
@@ -95,33 +58,34 @@ class RuterstopTestCase(TestCase):
             self.assertIsNotNone(d.direction)
         self.assertNotEqual(i, 0, "no items were returned")
 
-    def test_timed_cache(self):
-        now = MagicMock()
-        spy = Mock(return_value=1) # don't need return value
+    @patch("ruterstop.get_realtime_stop", return_value=None)
+    def test_groups_output_when_grouped_enabled(self, _):
+        now = datetime.now()
+        in0min = now + timedelta(seconds=1)
+        in1min = now + timedelta(minutes=1)
+        in2min = now + timedelta(minutes=2, seconds=1)
+        in3min = now + timedelta(minutes=3, seconds=1)
+        in4min = now + timedelta(minutes=4, seconds=1)
 
-        @ruterstop.timed_cache(expires_sec=60, now=now)
-        def func(a, b=None):
-            spy() # for counting calls
-            return [a, b] # return list to compare references
+        # Build list of fake departures
+        deps = []
+        deps.append(ruterstop.Departure("01", "Zero", in0min, "inbound"))
+        deps.append(ruterstop.Departure("10", "Ones", in1min, "inbound"))
+        deps.append(ruterstop.Departure("11", "Ones", in1min, "inbound"))
+        deps.append(ruterstop.Departure("12", "Ones", in1min, "inbound"))
+        deps.append(ruterstop.Departure("20", "Twos", in2min, "inbound"))
+        deps.append(ruterstop.Departure("21", "Twos", in2min, "inbound"))
+        deps.append(ruterstop.Departure("21", "Thre", in3min, "inbound"))
+        deps.append(ruterstop.Departure("21", "Four", in4min, "inbound"))
 
-        def test_set():
-            res1 = func(1, 2)
-            res2 = func(1, 2)
-            self.assertEqual(res1, [1, 2])
-            self.assertIs(res1, res2, "did not return same object as first call")
-            self.assertEqual(spy.call_count, 1)
+        output = StringIO()
+        args = " --stop-id=2121 --direction=inbound --grouped".split(' ')
 
-            res3 = func(2, 2)
-            self.assertEqual(res3, [2, 2])
-            self.assertEqual(spy.call_count, 2)
-
-
-        # Test cache function
-        now.return_value = datetime.min
-        test_set()
-        spy.reset_mock()
-
-        # Test expired key invokes function again
-        now.return_value = datetime.min + timedelta(seconds=61)
-        test_set()
-        spy.reset_mock()
+        # Use the fake departure list in this patch
+        with patch("ruterstop.parse_departures", return_value=deps) as mock:
+            ruterstop.main(args, stdout=output)
+            lines = output.getvalue().split('\n')
+            self.assertEqual(lines[0], "01, 10, 11, 12    naa")
+            self.assertEqual(lines[1], "20, 21          2 min")
+            self.assertEqual(lines[2], "21 Thre         3 min")
+            self.assertEqual(lines[3], "21 Four         4 min")
