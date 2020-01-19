@@ -19,6 +19,7 @@ class WebAppTestCase(TestCase):
     @patch("ruterstop.get_departures", return_value=dict(a="foo"))
     def test_calls_api_on_proper_path(self, get_mock, format_mock):
         res = self.app.get("/1234")
+        self.assertEqual(res.content_type, "text/plain")
         get_mock.assert_called_once_with(stop_id=1234)
         format_mock.assert_called_once_with(dict(a="foo"))
 

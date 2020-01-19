@@ -45,13 +45,13 @@ ENTUR_GRAPHQL_QUERY = """
 webapp = bottle.Bottle()
 
 def not_found_error_handler(res):
-    res.content_type = "text/plain"
+    res.set_header("Content-Type", "text/plain")
     return "Ugyldig stoppested"
 
 webapp.error(code=404)(not_found_error_handler)
 
 def default_error_handler(res):
-    res.content_type = "text/plain"
+    res.set_header("Content-Type", "text/plain")
     return "Feil på serveren"
 
 webapp.default_error_handler = default_error_handler
@@ -152,6 +152,7 @@ def serve_departures(stop_id):
         kw["grouped"] = True
 
     deps = get_departures(stop_id=stop_id)
+    bottle.response.set_header("Content-Type", "text/plain")
     return format_departure_list(deps, **kw)
 
 
