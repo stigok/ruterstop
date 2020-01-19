@@ -52,6 +52,7 @@ webapp.error(code=404)(not_found_error_handler)
 
 def default_error_handler(res):
     res.set_header("Content-Type", "text/plain")
+    print(res.traceback, file=sys.stderr)
     return "Feil på serveren"
 
 webapp.default_error_handler = default_error_handler
