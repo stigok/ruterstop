@@ -175,7 +175,7 @@ def get_departures(*, stop_id=None):
 
 def format_departure_list(departures, *, min_eta=0, directions=None, grouped=False):
     """
-    Filters and groups departures based on arguments passed.
+    Filters, formats and groups departures based on arguments passed.
     """
     deps = (d for d in departures)
 
