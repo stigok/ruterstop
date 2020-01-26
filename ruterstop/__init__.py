@@ -85,7 +85,7 @@ def human_delta(until=None, *, since=None):
     return "{:2} min".format(mins)
 
 
-class Departure(namedtuple("Departure", ["line", "name", "eta", "direction"])):
+class Departure(namedtuple("Departure", ["line", "name", "eta", "direction", "realtime"], defaults=(False,))):
     """Represents a transport departure"""
     def __str__(self):
         name = str(self.line)
