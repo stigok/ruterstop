@@ -61,10 +61,10 @@ class RuterstopTestCase(TestCase):
     @patch("ruterstop.get_realtime_stop", return_value=None)
     def test_does_not_hide_realtime_departures_after_eta(self, _):
         now = datetime.now()
-        past1min = now - timedelta(minutes=1)
-        past2min = now - timedelta(minutes=2)
         past3min = now - timedelta(minutes=3)
-        futr1min = now + timedelta(minutes=1)
+        past2min = now - timedelta(minutes=2)
+        past1min = now - timedelta(minutes=1)
+        futr1min = now + timedelta(minutes=1, seconds=1)
 
         deps = []
         d = ruterstop.Departure
@@ -80,7 +80,7 @@ class RuterstopTestCase(TestCase):
         with patch("ruterstop.parse_departures", return_value=deps) as mock:
             ruterstop.main(args, stdout=output)
             lines = output.getvalue().split('\n')
-            self.assertEqual(lines[0], "01, 02, 03     ca naa")
+            self.assertEqual(lines[0], "01, 02, 03        naa")
             self.assertEqual(lines[1], "51 d            1 min")
 
     @patch("ruterstop.get_realtime_stop", return_value=None)
