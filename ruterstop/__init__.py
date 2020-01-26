@@ -26,7 +26,7 @@ ENTUR_GRAPHQL_QUERY = """
 {
   stopPlace(id: "NSR:StopPlace:%(stop_id)s") {
     name
-    estimatedCalls(timeRange: 72100, numberOfDepartures: 10) {
+    estimatedCalls(timeRange: 72100, numberOfDepartures: 20) {
       expectedArrivalTime
       realtime
       destinationDisplay {
