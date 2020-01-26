@@ -97,7 +97,7 @@ class Departure(namedtuple("Departure", ["line", "name", "eta", "direction", "re
 Departure.__new__.__defaults__ = (False,)
 
 
-@timed_cache(expires_sec=60)
+@timed_cache(expires_sec=30)
 def get_realtime_stop(*, stop_id=None):
     """
     Query EnTur API for realtime stop information.
