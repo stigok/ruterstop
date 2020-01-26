@@ -59,6 +59,31 @@ class RuterstopTestCase(TestCase):
         self.assertNotEqual(i, 0, "no items were returned")
 
     @patch("ruterstop.get_realtime_stop", return_value=None)
+    def test_does_not_hide_realtime_departures_after_eta(self, _):
+        now = datetime.now()
+        past3min = now - timedelta(minutes=3)
+        past2min = now - timedelta(minutes=2)
+        past1min = now - timedelta(minutes=1)
+        futr1min = now + timedelta(minutes=1, seconds=1)
+
+        deps = []
+        d = ruterstop.Departure
+        deps.append(d("01", "a", past1min, "inbound", realtime=True))
+        deps.append(d("02", "b", past2min, "inbound", realtime=True))
+        deps.append(d("03", "c", past3min, "inbound", realtime=True))
+        deps.append(d("51", "d", futr1min, "inbound", realtime=True))
+
+        output = StringIO()
+        args = " --stop-id=2121 --direction=inbound --grouped".split(' ')
+
+        # Use the fake departure list in this patch
+        with patch("ruterstop.parse_departures", return_value=deps) as mock:
+            ruterstop.main(args, stdout=output)
+            lines = output.getvalue().split('\n')
+            self.assertEqual(lines[0], "01, 02, 03        naa")
+            self.assertEqual(lines[1], "51 d            1 min")
+
+    @patch("ruterstop.get_realtime_stop", return_value=None)
     def test_groups_output_when_grouped_enabled(self, _):
         now = datetime.now()
         in0min = now + timedelta(seconds=1)

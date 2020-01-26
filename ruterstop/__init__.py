@@ -28,6 +28,7 @@ ENTUR_GRAPHQL_QUERY = """
     name
     estimatedCalls(timeRange: 72100, numberOfDepartures: 10) {
       expectedArrivalTime
+      realtime
       destinationDisplay {
         frontText
       }
@@ -84,13 +85,16 @@ def human_delta(until=None, *, since=None):
     return "{:2} min".format(mins)
 
 
-class Departure(namedtuple("Departure", ["line", "name", "eta", "direction"])):
+class Departure(namedtuple("Departure", ["line", "name", "eta", "direction", "realtime"])):
     """Represents a transport departure"""
     def __str__(self):
         name = str(self.line)
         if self.name:
             name += " " + self.name
         return "{:14}{:>7}".format(name[:14], human_delta(until=self.eta))
+
+# Python < 3.7 equivalent of `defaults` kwarg of `namedtuple`
+Departure.__new__.__defaults__ = (False,)
 
 
 @timed_cache(expires_sec=60)
@@ -132,7 +136,8 @@ def parse_departures(raw_dict, *, date_fmt="%Y-%m-%dT%H:%M:%S%z"):
                 line=dep["serviceJourney"]["line"]["publicCode"],
                 name=norwegian_ascii(dep["destinationDisplay"]["frontText"]),
                 eta=eta,
-                direction=dep["serviceJourney"]["directionType"]
+                direction=dep["serviceJourney"]["directionType"],
+                realtime=dep["realtime"],
             )
 
 
@@ -179,7 +184,8 @@ def format_departure_list(departures, *, min_eta=0, directions=None, grouped=Fal
 
     # Filter departures with minimum time treshold
     time_treshold = datetime.now() + timedelta(minutes=min_eta)
-    deps = filter(lambda d: d.eta >= time_treshold, deps)
+    deps = filter(lambda d: d.eta >= time_treshold or
+                            (min_eta == 0 and d.realtime), deps)
 
     # Group departures with same departure time
     # TODO: The check for whether directions has filter might need more work
