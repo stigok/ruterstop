@@ -33,12 +33,16 @@ class WebAppTestCase(TestCase):
 
     @patch("ruterstop.get_departures", return_value=None)
     def test_simple_500_error(self, mock):
-        mock.side_effect = Exception("barf")
-        res = self.app.get("/1234", expect_errors=True)
-        self.assertEqual(res.content_type, "text/plain")
-        self.assertEqual(res.status_code, 500)
-        self.assertEqual(res.body, "Feil på serveren".encode())
-        self.assertEqual(mock.call_count, 1)
+        mock.side_effect = Exception("barf voof")
+
+        with self.assertLogs(logger="ruterstop", level="ERROR") as log:
+            res = self.app.get("/1234", expect_errors=True)
+            self.assertEqual(res.content_type, "text/plain")
+            self.assertEqual(res.status_code, 500)
+            self.assertEqual(res.body, "Feil på serveren".encode())
+            self.assertEqual(mock.call_count, 1)
+
+            self.assertRegex(log.output[0], r"barf voof")
 
     @patch("ruterstop.format_departure_list", return_value=None)
     @patch("ruterstop.get_departures", return_value=dict(a="foo"))
