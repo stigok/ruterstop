@@ -133,7 +133,8 @@ def parse_departures(raw_dict, *, date_fmt="%Y-%m-%dT%H:%M:%S%z"):
                 line=dep["serviceJourney"]["line"]["publicCode"],
                 name=norwegian_ascii(dep["destinationDisplay"]["frontText"]),
                 eta=eta,
-                direction=dep["serviceJourney"]["directionType"]
+                direction=dep["serviceJourney"]["directionType"],
+                realtime=dep["realtime"],
             )
 
 
@@ -180,7 +181,8 @@ def format_departure_list(departures, *, min_eta=0, directions=None, grouped=Fal
 
     # Filter departures with minimum time treshold
     time_treshold = datetime.now() + timedelta(minutes=min_eta)
-    deps = filter(lambda d: d.eta >= time_treshold, deps)
+    deps = filter(lambda d: d.eta >= time_treshold or
+                            (min_eta == 0 and d.realtime), deps)
 
     # Group departures with same departure time
     # TODO: The check for whether directions has filter might need more work
