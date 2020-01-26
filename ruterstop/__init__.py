@@ -44,6 +44,7 @@ ENTUR_GRAPHQL_QUERY = """
 """
 
 webapp = bottle.Bottle()
+log = logging.getLogger("ruterstop")
 
 def not_found_error_handler(res):
     res.set_header("Content-Type", "text/plain")
@@ -105,7 +106,7 @@ def get_realtime_stop(*, stop_id=None):
     See output format and build your own queries at:
     https://api.entur.io/journey-planner/v2/ide/
     """
-    logging.debug("Requesting fresh data from API")
+    log.debug("Requesting fresh data from API")
     headers = {
         "Accept": "application/json",
         "ET-Client-Name": "ruterstop - stigok/ruterstop",
