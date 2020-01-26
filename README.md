@@ -78,6 +78,27 @@ $ curl localhost:4000/6013?direction=outbound
 31 Snaroeya    48 min
 ```
 
+## Utvikling
+
+Kjør tester
+
+```
+$ python -m venv venv
+$ source venv/bin/activate
+$ pip install -r requirements.txt
+$ python setup.py test
+```
+
+Eller med Docker
+
+```
+$ .docker/run-tests.sh
+$ .docker/run-tests.sh 3.5
+$ .docker/run-tests.sh 3.6
+$ .docker/run-tests.sh 3.7
+$ .docker/run-tests.sh 3.8
+```
+
 ## Motivasjon
 
 Jeg vil se avganger fra mitt nærmeste stoppested mens jeg sitter ved
