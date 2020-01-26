@@ -2,9 +2,9 @@
 
 Et program som viser sanntidsinformasjon for stoppesteder i Oslo og Akershus.
 
-- Lister opp de neste 10 avgangene
-- Velg en bestemt kjøreretning med `--direction`
-- Starter en HTTP server med `--server`
+- Lister 20 av de neste avgangene
+- Bruk filtre som `--direction`, `--grouped` og `--min-eta`
+- Start en HTTP server med `--server`
 - Bruk `--help` for full hjelp
 
 Innspill, tanker og feilmeldinger mottas med glede!
@@ -34,48 +34,44 @@ Søk opp flere stopp fra [EnTur sine sider for stoppesteder][stoppesteder].
 ```
 $ ruterstop --stop-id 6013 --direction outbound
 31 Snaroeya       naa
-31 Fornebu      5 min
-25 Majorstuen   6 min
-33 Filipstad    6 min
-25 Majorstuen   8 min
+31 Fornebu     10 min
+31 Snaroeya    20 min
+25 Majorstuen  28 min
+31 Fornebu     30 min
 ```
 
-Eller start som en HTTP server.
+Eller start som en HTTP server
 
 ```
 $ ruterstop --server
 ```
 
-Stoppested velges da i adressen til spørringen.
+Stoppested og filtre velges i adressen til spørringen
 
 ```
-$ curl -i localhost:4000/6013
-HTTP/1.0 200 OK
-Date: Sat, 16 Nov 2019 17:09:48 GMT
-Server: WSGIServer/0.2 CPython/3.7.5
-Content-Type: text/html; charset=UTF-8
-
-25 Loerenskog     naa
-31 Grorud T     1 min
-31 Snaroeya     2 min
-31 Tonsenhagen  7 min
-31 Fornebu      8 min
-25 Majorstuen   8 min
-31 Snaroeya    14 min
-31 Grorud T    14 min
+$ curl localhost:4000/6013?direction=outbound
+25 Majorstuen     naa
+31 Snaroeya       naa
+31 Fornebu        naa
+31 Snaroeya     8 min
+25 Majorstuen  16 min
+31 Fornebu     18 min
+31 Snaroeya    28 min
+31 Fornebu     38 min
+25 Majorstuen  46 min
+31 Snaroeya    48 min
 ```
 
 ## Motivasjon
 
-Jeg fikk et ønske om å kunne se avganger fra mitt nærmeste stoppested mens
-jeg sitter ved kjøkkenbordet, uten å måtte bruke mobilen.
+Jeg vil se avganger fra mitt nærmeste stoppested mens jeg sitter ved
+kjøkkenbordet, uten å måtte bruke mobilen.
+
+Dette prosjektet blir også utnyttet til å prøve ut alle ting om Python jeg
+både kan og ikke kan.
+
 Jeg skrev dette programmet som en backend til en ESP8266-variant med en
 OLED skjerm.
-
-Jeg bruker dette prosjektet til å utnytte alle ting jeg kan kom Python, og
-prøver ut ting jeg ikke har gjort før, som f.eks. å pakke det sammen med
-`setuptools`.
-
 Fungerende klient-kode for en Adafruit Feather HUZZAH ESP8266 med en OLED
 FeatherWing finnes i [eksempel-mappen](./examples/arduino-esp8266-feather-oled).
 
