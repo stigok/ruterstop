@@ -28,6 +28,7 @@ ENTUR_GRAPHQL_QUERY = """
     name
     estimatedCalls(timeRange: 72100, numberOfDepartures: 10) {
       expectedArrivalTime
+      realtime
       destinationDisplay {
         frontText
       }
