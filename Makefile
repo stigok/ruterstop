@@ -1,10 +1,20 @@
-init:
-	pip install -r requirements.txt
-
+.PHONY: test
 test:
-	python setup.py test
+	python3 setup.py test
 
-test-e2e: test
-	python ruterstop/ --stop-id=6013 --min-eta=2 --direction=outbound
+.PHONY: matrix-unit-tests
+matrix-unit-tests:
+	.docker/run-tests.sh 3.5 matrix-unit-tests python setup.py test
+	.docker/run-tests.sh 3.6 matrix-unit-tests python setup.py test
+	.docker/run-tests.sh 3.7 matrix-unit-tests python setup.py test
+	.docker/run-tests.sh 3.8 matrix-unit-tests python setup.py test
 
-.PHONY: init test test-e2e
+.PHONY: matrix-install
+matrix-install:
+	.docker/run-tests.sh 3.5 matrix-install pip install .
+	.docker/run-tests.sh 3.6 matrix-install pip install .
+	.docker/run-tests.sh 3.7 matrix-install pip install .
+	.docker/run-tests.sh 3.8 matrix-install pip install .
+
+.PHONY: matrix
+matrix: matrix-unit-tests matrix-install

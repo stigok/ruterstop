@@ -1,39 +1,22 @@
 #!/bin/bash
-
+# Build and run a Docker image based on a specific Python version
 set -eu
 
-# Change working directory to repository root,
-# expecting this script to reside at :/.docker/<script>
+# Change working directory to repo root (if this script's in .docker)
 src="$(dirname "$(readlink -f "$0")")"
 cd "$src/.."
 
-dockerfile="$src/Dockerfile"
+pyver=$1
+shift
+test_name=${1}
+shift
+tag=ruterstop:${test_name}-${pyver}
 
-function run() {
-  pyver=$1
-  echo $pyver
-  tag=ruterstop:python${pyver}
+set -x
+docker build --network host \
+             --file ${src}/Dockerfile.${test_name} \
+             --build-arg PYVER="$pyver" \
+             --tag ${tag} \
+             . > /dev/null
 
-  echo "*** Building ${tag} ***"
-  docker build -f ${dockerfile} \
-         --build-arg PYVER=$pyver \
-         --tag ${tag} \
-         .
-
-  echo "*** Running ${tag} ***"
-  runcmd="docker run --network=host $tag"
-
-  $runcmd sh -c "python setup.py test"
-  $runcmd sh -c "ruterstop --stop-id 6013 --direction outbound --min-eta 2"
-}
-
-
-if [ -n ${1:-''} ]
-then
-  run $1
-else
-  for pyver in 3.5 3.6 3.7 3.8
-  do
-    run $pyver
-  done
-fi
+docker run --network host $tag $@
