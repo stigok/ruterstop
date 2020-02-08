@@ -21,6 +21,27 @@ import bottle
 from ruterstop.utils import norwegian_ascii, timed_cache
 
 ENTUR_CLIENT_ID = socket.gethostname()
+ENTUR_STOP_PLACE_ENDPOINT = "https://api.entur.io/stop-places/v1/graphql"
+ENTUR_STOP_PLACE_QUERY = """
+{
+  stopPlace(size: 10, query: "%(stop_name)s") {
+    id
+    topographicPlace {
+      name {
+        value
+      }
+      parentTopographicPlace {
+        name {
+          value
+        }
+      }
+    }
+    name {
+      value
+    }
+  }
+}
+"""
 ENTUR_GRAPHQL_ENDPOINT = "https://api.entur.io/journey-planner/v2/graphql"
 ENTUR_GRAPHQL_QUERY = """
 {
@@ -118,6 +139,33 @@ def get_realtime_stop(*, stop_id=None):
     res.raise_for_status()
     return res.json()
 
+
+class StopPlace(namedtuple("StopPlace", ["id", "name", "region", "parentRegion"])):
+    def __str__(self):
+        return "{id:8s}{name} ({region}, {parentRegion})".format(**self._asdict())
+
+
+def get_stop_search_result(*, name_search):
+    log.debug("Searching for stop by name: %s", name_search)
+    headers = {
+        "Accept": "application/json",
+        "ET-Client-Name": "ruterstop - stigok/ruterstop",
+        "ET-Client-Id": ENTUR_CLIENT_ID
+    }
+    qry = ENTUR_STOP_PLACE_QUERY % dict(stop_name=name_search)
+    res = requests.post(ENTUR_STOP_PLACE_ENDPOINT, headers=headers, timeout=5,
+                        json=dict(query=qry, variables={}))
+    res.raise_for_status()
+    return res.json()
+
+
+def parse_stops(raw_dict):
+    for stop in raw_dict["data"]["stopPlace"]:
+        numid = stop["id"].rsplit(":", maxsplit=1).pop()
+        yield StopPlace(numid,
+                stop["name"]["value"],
+                stop["topographicPlace"]["name"]["value"],
+                stop["topographicPlace"]["parentTopographicPlace"]["name"]["value"])
 
 def parse_departures(raw_dict, *, date_fmt="%Y-%m-%dT%H:%M:%S%z"):
     """

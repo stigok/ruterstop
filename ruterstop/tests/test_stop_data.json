@@ -1,0 +1,86 @@
+{
+  "data": {
+    "stopPlace": [
+      {
+        "id": "NSR:StopPlace:17196",
+        "topographicPlace": {
+          "name": {
+            "value": "Ringerike"
+          },
+          "parentTopographicPlace": {
+            "name": {
+              "value": "Viken"
+            }
+          }
+        },
+        "name": {
+          "value": "Bjerke"
+        }
+      },
+      {
+        "id": "NSR:StopPlace:19288",
+        "topographicPlace": {
+          "name": {
+            "value": "Larvik"
+          },
+          "parentTopographicPlace": {
+            "name": {
+              "value": "Vestfold og Telemark"
+            }
+          }
+        },
+        "name": {
+          "value": "Bjerke"
+        }
+      },
+      {
+        "id": "NSR:StopPlace:28406",
+        "topographicPlace": {
+          "name": {
+            "value": "Suldal"
+          },
+          "parentTopographicPlace": {
+            "name": {
+              "value": "Rogaland"
+            }
+          }
+        },
+        "name": {
+          "value": "Bjerga"
+        }
+      },
+      {
+        "id": "NSR:StopPlace:4063",
+        "topographicPlace": {
+          "name": {
+            "value": "Lillestrøm"
+          },
+          "parentTopographicPlace": {
+            "name": {
+              "value": "Viken"
+            }
+          }
+        },
+        "name": {
+          "value": "Bjerke"
+        }
+      },
+      {
+        "id": "NSR:StopPlace:46958",
+        "topographicPlace": {
+          "name": {
+            "value": "Hemnes"
+          },
+          "parentTopographicPlace": {
+            "name": {
+              "value": "Nordland"
+            }
+          }
+        },
+        "name": {
+          "value": "Bjerka"
+        }
+      }
+    ]
+  }
+}
