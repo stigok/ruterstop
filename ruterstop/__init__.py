@@ -268,6 +268,8 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
     """Main function for CLI usage"""
     # Parse command line arguments
     par = argparse.ArgumentParser(prog="ruterstop")
+    par.add_argument('--search-stop', type=str,
+                     help="search for a stop by name")
     par.add_argument('--stop-id',
                      help="find stops at https://stoppested.entur.org (guest:guest)")
     par.add_argument('--direction', choices=["inbound", "outbound"],
@@ -292,6 +294,14 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
+
+    # Search for stop?
+    if args.search_stop:
+        result = get_stop_search_result(name_search=args.search_stop)
+        stops = parse_stops(result)
+        for s in stops:
+            print(s, file=stdout)
+        return
 
     # Build direction filter list
     directions = args.direction if args.direction else ["inbound", "outbound"]

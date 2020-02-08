@@ -30,6 +30,9 @@ class CommandLineInterfaceTestCase(TestCase):
             first_departure = list(ruterstop.parse_departures(departure_data))[0]
             self.first_departure_time = first_departure.eta
 
+        with open(os.path.join(p, "test_stop_data.json")) as fp:
+            self.raw_stop_data = json.load(fp)
+
         # This is highly dependent on the test data
         self.expected_output = [
             "31 Snaroeya       naa",
@@ -71,3 +74,9 @@ class CommandLineInterfaceTestCase(TestCase):
 
             out = run(["--stop-id", "1337", "--direction", "inbound"])
             self.assertNotIn("Majorstuen", out)
+
+    def test_returns_stop_id_by_name(self):
+        with patch("ruterstop.get_stop_search_result", return_value=self.raw_stop_data):
+            out = run(["--search-stop", "foobar"])
+            out = filter(None, out) # remove empty lines
+            self.assertEqual(len(list(out)), 5)
