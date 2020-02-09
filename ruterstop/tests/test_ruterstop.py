@@ -26,6 +26,32 @@ class DepartureClassTestCase(TestCase):
             self.assertEqual(str(d), "21 longnamelon 77 min")
 
 
+class StopPlaceTestCase(TestCase):
+    def setUp(self):
+        # Load test data for the external API
+        p = os.path.realpath(os.path.dirname(__file__))
+        with open(os.path.join(p, "test_stop_data.json")) as fp:
+            self.raw_stop_data = json.load(fp)
+
+    def test_get_stop_search_result(self):
+        with patch('requests.post') as mock:
+            ruterstop.get_stop_search_result(name_search="foobar")
+            self.assertEqual(mock.call_count, 1)
+            _, kwargs = mock.call_args
+
+            self.assertIsNotNone(kwargs["headers"]["ET-Client-Name"])
+            self.assertIsNotNone(kwargs["headers"]["ET-Client-Id"])
+            self.assertIsNotNone(kwargs.get("timeout"))
+
+    def test_parse_stop(self):
+        stops = ruterstop.parse_stops(self.raw_stop_data)
+        for s in stops:
+            self.assertTrue(s.id)
+            self.assertTrue(s.name)
+            self.assertTrue(s.region)
+            self.assertTrue(s.parentRegion)
+
+
 class RuterstopTestCase(TestCase):
     def setUp(self):
         # Load test data for the external API
