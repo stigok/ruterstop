@@ -5,6 +5,7 @@ Et program som viser sanntidsinformasjon for stoppesteder i Oslo og Akershus.
 - Lister 20 av de neste avgangene
 - Bruk filtre som `--direction`, `--grouped` og `--min-eta`
 - Start en HTTP server med `--server`
+- Søk etter stoppesteder med `--search-stop`
 - Bruk `--help` for full hjelp
 
 Innspill, tanker og feilmeldinger mottas med glede!
@@ -28,8 +29,23 @@ $ pip install -r requirements.txt
 $ python ruterstop/
 ```
 
-Kjør programmet med et valgt stoppested. *6013* er Stig, på Årvoll, i Oslo.
-Søk opp flere stopp fra [EnTur sine sider for stoppesteder][stoppesteder].
+Søk etter stoppested
+
+```
+$ ruterstop --search-stop stig
+6013    Stig (Oslo, Oslo)
+59445   Stige (Ålesund, Møre og Romsdal)
+13479   Stigen (Ringebu, Innlandet)
+18602   Stigen (Sandefjord, Vestfold og Telemark)
+18605   Stiger (Sandefjord, Vestfold og Telemark)
+21507   Stigen (Porsgrunn, Vestfold og Telemark)
+3857    Stigen (Aurskog-Høland, Viken)
+45978   Stigen (Nærøysund, Trøndelag)
+54253   Stigen (Lyngen, Troms og Finnmark)
+7844    Stigen (Trysil, Innlandet)
+```
+
+Kjør programmet med et valgt stoppested
 
 ```
 $ ruterstop --stop-id 6013 --direction outbound
