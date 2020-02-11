@@ -99,13 +99,14 @@ class RuterstopTestCase(TestCase):
         deps.append(d("03", "c", past3min, "inbound", realtime=True))
         deps.append(d("51", "d", futr1min, "inbound", realtime=True))
 
-        output = StringIO()
         args = " --stop-id=2121 --direction=inbound --grouped".split(' ')
 
         # Use the fake departure list in this patch
         with patch("ruterstop.parse_departures", return_value=deps) as mock:
+            output = StringIO()
             ruterstop.main(args, stdout=output)
             lines = output.getvalue().split('\n')
+            output.close()
             self.assertEqual(lines[0], "01, 02, 03        naa")
             self.assertEqual(lines[1], "51 d            1 min")
 
@@ -129,13 +130,13 @@ class RuterstopTestCase(TestCase):
         deps.append(ruterstop.Departure("21", "Thre", in3min, "inbound"))
         deps.append(ruterstop.Departure("21", "Four", in4min, "inbound"))
 
-        output = StringIO()
-        args = " --stop-id=2121 --direction=inbound --grouped".split(' ')
-
         # Use the fake departure list in this patch
         with patch("ruterstop.parse_departures", return_value=deps) as mock:
+            output = StringIO()
+            args = " --stop-id=2121 --direction=inbound --grouped".split(' ')
             ruterstop.main(args, stdout=output)
             lines = output.getvalue().split('\n')
+            output.close()
             self.assertEqual(lines[0], "01, 10, 11, 12    naa")
             self.assertEqual(lines[1], "20, 21          2 min")
             self.assertEqual(lines[2], "21 Thre         3 min")
