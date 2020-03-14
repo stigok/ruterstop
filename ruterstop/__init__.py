@@ -268,22 +268,23 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
     """Main function for CLI usage"""
     # Parse command line arguments
     par = argparse.ArgumentParser(prog="ruterstop")
-    par.add_argument('--search-stop', type=str,
+    par.add_argument('--search-stop', type=str, metavar="<name>",
                      help="search for a stop by name")
-    par.add_argument('--stop-id',
-                     help="find stops at https://stoppested.entur.org (guest:guest)")
+    par.add_argument('--stop-id', metavar="<id>",
+                     help="use --search-stop or official website to find stops " +
+                          "https://stoppested.entur.org (guest:guest)")
     par.add_argument('--direction', choices=["inbound", "outbound"],
                      help="filter direction of departures")
-    par.add_argument('--min-eta', type=int, default=0,
+    par.add_argument('--min-eta', type=int, default=0, metavar="<minutes>",
                      help="minimum ETA of departures to return")
     par.add_argument('--grouped', action="store_true",
-                     help="group departures with same ETA together" +
-                          "when --direction is specified.")
+                     help="group departures with same ETA together " +
+                          "when --direction is also specified.")
     par.add_argument('--server', action="store_true",
                      help="start a HTTP server")
-    par.add_argument('--host', type=str, default="0.0.0.0",
+    par.add_argument('--host', type=str, default="0.0.0.0", metavar="<ip|hostname>",
                      help="HTTP server hostname")
-    par.add_argument('--port', type=int, default=4000,
+    par.add_argument('--port', type=int, default=4000, metavar="<port>",
                      help="HTTP server listen port")
     par.add_argument('--debug', action="store_true",
                      help="enable debug logging")
