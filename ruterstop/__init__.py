@@ -20,6 +20,8 @@ import bottle
 
 from ruterstop.utils import norwegian_ascii, timed_cache
 
+__version__ = "0.2.0"
+
 ENTUR_CLIENT_ID = socket.gethostname()
 ENTUR_STOP_PLACE_ENDPOINT = "https://api.entur.io/stop-places/v1/graphql"
 ENTUR_STOP_PLACE_QUERY = """
@@ -288,6 +290,8 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
                      help="HTTP server listen port")
     par.add_argument('--debug', action="store_true",
                      help="enable debug logging")
+    par.add_argument('--version', action="store_true",
+                     help="show version information")
 
     args = par.parse_args(argv[1:])
 
@@ -295,6 +299,11 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
+
+    # Show version information?
+    if args.version:
+        print("ruterstop " + __version__, file=stdout)
+        return
 
     # Search for stop?
     if args.search_stop:
