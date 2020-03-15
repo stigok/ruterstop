@@ -21,7 +21,7 @@ function run() {
          .
 
   echo "*** Running ${tag} ***"
-  runcmd="docker run $tag"
+  runcmd="docker run --network=host $tag"
 
   $runcmd sh -c "python setup.py test"
   $runcmd sh -c "ruterstop --stop-id 6013 --direction outbound --min-eta 2"
