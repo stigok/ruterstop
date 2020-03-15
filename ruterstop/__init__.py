@@ -12,7 +12,7 @@ import logging
 import os
 import socket
 import sys
-from collections import defaultdict, namedtuple
+from collections import defaultdict, namedtuple, OrderedDict
 from datetime import datetime, timedelta
 
 import requests
@@ -242,13 +242,19 @@ def format_departure_list(departures, *, min_eta=0, directions=None, grouped=Fal
     # TODO: The check for whether directions has filter might need more work
     if grouped and dirs:
         # Group by ETA value
-        keyed = defaultdict(list)
+        # NOTE: working around defaultdict(list) as we can't trust insertion
+        # order of the items in Python 3.5
+        by_eta = OrderedDict()
         for dep in deps:
-            keyed[human_delta(dep.eta)].append(dep)
+            k = human_delta(dep.eta)
+            if not k in by_eta.keys():
+                by_eta[k] = [dep]
+            else:
+                by_eta[k].append(dep)
 
         # Build string output
         newdeps = list()
-        for eta, deps in keyed.items():
+        for eta, deps in by_eta.items():
             # Print single departures normally
             if len(deps) == 1:
                 newdeps.append(deps[0])
