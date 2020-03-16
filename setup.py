@@ -1,16 +1,20 @@
-import os
-import sys
+import ast
+import re
 
 from setuptools import setup
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
-from ruterstop import __version__
+
+_version_re = re.compile(r'__version__\s+=\s+(.*)')
+
+with open('ruterstop/__init__.py', 'rb') as f:
+    version = str(ast.literal_eval(_version_re.search(
+        f.read().decode('utf-8')).group(1)))
 
 setup(
     name="ruterstop",
     description="Et program som viser sanntidsinformasjon for stoppesteder i " +
                 "Oslo og Akershus.",
-    version=__version__,
+    version=version,
     url="https://github.com/stigok/ruterstop",
     author="stigok",
     author_email="stig@stigok.com",
