@@ -12,9 +12,17 @@ Innspill, tanker og feilmeldinger mottas med glede!
 
 ![Adafruit Feather HUZZAH ESP8266 med OLED FeatherWing som kjører ruterstop.py][demopic-1]
 
-## Brukerveiledning
+## Installasjon
 
 Trenger Python >=3.5 for å kjøre.
+
+### Installer fra PyPi
+
+```
+$ pip install ruterstop
+```
+
+### Bygg fra kildekode
 
 Last ned kildekoden og installer programmet med avhengigheter fra kildekodemappen
 
@@ -28,6 +36,8 @@ $ pip install .
 $ pip install -r requirements.txt
 $ python ruterstop/
 ```
+
+## Brukerveiledning
 
 Søk etter stoppested
 
@@ -80,7 +90,7 @@ $ curl localhost:4000/6013?direction=outbound
 
 ## Utvikling
 
-Kjør tester
+### Kjør tester
 
 ```
 $ python -m venv venv
@@ -89,15 +99,13 @@ $ pip install -r requirements.txt
 $ python setup.py test
 ```
 
-Eller med Docker
+### Kjør multi-versjon tester i Docker
 
 ```
-$ .docker/run-tests.sh
-$ .docker/run-tests.sh 3.5
-$ .docker/run-tests.sh 3.6
-$ .docker/run-tests.sh 3.7
-$ .docker/run-tests.sh 3.8
+$ make matrix
 ```
+
+Se Makefile for detaljer
 
 ## Motivasjon
 
