@@ -20,7 +20,7 @@ import bottle
 
 from ruterstop.utils import delta, human_delta, norwegian_ascii, timed_cache
 
-__version__ = "0.3.1"
+__version__ = "0.4.0"
 
 ENTUR_CLIENT_ID = __version__
 ENTUR_STOP_PLACE_ENDPOINT = "https://api.entur.io/stop-places/v1/graphql"
