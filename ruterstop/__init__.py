@@ -145,10 +145,12 @@ def get_stop_search_result(*, name_search):
 def parse_stops(raw_dict):
     for stop in raw_dict["data"]["stopPlace"]:
         numid = stop["id"].rsplit(":", maxsplit=1).pop()
-        yield StopPlace(numid,
-                stop["name"]["value"],
-                stop["topographicPlace"]["name"]["value"],
-                stop["topographicPlace"]["parentTopographicPlace"]["name"]["value"])
+        yield StopPlace(
+            numid,
+            stop["name"]["value"],
+            stop["topographicPlace"]["name"]["value"],
+            stop["topographicPlace"]["parentTopographicPlace"]["name"]["value"])
+
 
 def parse_departures(raw_dict, *, date_fmt="%Y-%m-%dT%H:%M:%S%z"):
     """
@@ -235,7 +237,7 @@ def format_departure_list(departures, *, min_eta=0, long_eta=-1, directions=None
 
         # Build string output
         newdeps = list()
-        for eta, deps in by_eta.items():
+        for _, deps in by_eta.items():
             # Print single departures normally
             if len(deps) == 1:
                 newdeps.append(deps[0])
@@ -249,7 +251,7 @@ def format_departure_list(departures, *, min_eta=0, long_eta=-1, directions=None
     # Create pretty output
     s = ""
     for dep in deps:
-        if long_eta >= 0 and delta(dep.eta) > long_eta:
+        if 0 < long_eta < delta(dep.eta):
             s += dep.ts_str() + '\n'
         else:
             s += str(dep) + '\n'
