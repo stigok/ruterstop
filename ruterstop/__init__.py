@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 import requests
 import bottle
 
-from ruterstop.utils import norwegian_ascii, timed_cache, human_delta
+from ruterstop.utils import delta, human_delta, norwegian_ascii, timed_cache
 
 __version__ = "0.3.1"
 
@@ -90,6 +90,13 @@ class Departure(namedtuple("Departure", ["line", "name", "eta", "direction", "re
         if self.name:
             name += " " + self.name
         return "{:14}{:>7}".format(name[:14], human_delta(until=self.eta))
+
+    def ts_str(self):
+        name = str(self.line)
+        if self.name:
+            name += " " + self.name
+        return "{:16}{:%H:%M}".format(name[:14], self.eta)
+
 
 # Python < 3.7 equivalent of `defaults` kwarg of `namedtuple`
 Departure.__new__.__defaults__ = (False,)
@@ -197,7 +204,7 @@ def get_departures(*, stop_id=None):
     return parse_departures(raw_stop)
 
 
-def format_departure_list(departures, *, min_eta=0, directions=None, grouped=False):
+def format_departure_list(departures, *, min_eta=0, long_eta=-1, directions=None, grouped=False):
     """
     Filters, formats and groups departures based on arguments passed.
     """
@@ -242,7 +249,10 @@ def format_departure_list(departures, *, min_eta=0, directions=None, grouped=Fal
     # Create pretty output
     s = ""
     for dep in deps:
-        s += str(dep) + '\n'
+        if long_eta >= 0 and delta(dep.eta) > long_eta:
+            s += dep.ts_str() + '\n'
+        else:
+            s += str(dep) + '\n'
     return s
 
 
@@ -259,6 +269,9 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
                      help="filter direction of departures")
     par.add_argument('--min-eta', type=int, default=0, metavar="<minutes>",
                      help="minimum ETA of departures to return")
+    par.add_argument('--long-eta', type=int, default=-1, metavar="<minutes>",
+                     help="show departure time when ETA is later than this limit" +
+                          "(disable with -1)")
     par.add_argument('--grouped', action="store_true",
                      help="group departures with same ETA together " +
                           "when --direction is also specified.")
@@ -306,7 +319,9 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
 
         # Just print stop information
         deps = get_departures(stop_id=args.stop_id)
-        formatted = format_departure_list(deps, min_eta=args.min_eta,
+        formatted = format_departure_list(deps,
+                                          min_eta=args.min_eta,
+                                          long_eta=args.long_eta,
                                           directions=directions,
                                           grouped=args.grouped)
 
