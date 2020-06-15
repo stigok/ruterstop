@@ -22,6 +22,11 @@ from ruterstop.utils import delta, human_delta, norwegian_ascii, timed_cache
 
 __version__ = "0.4.0"
 
+# Default settings
+DEFAULTS = dict(
+    long_eta=59
+)
+
 ENTUR_CLIENT_ID = __version__
 ENTUR_STOP_PLACE_ENDPOINT = "https://api.entur.io/stop-places/v1/graphql"
 ENTUR_STOP_PLACE_QUERY = """
@@ -206,7 +211,7 @@ def get_departures(*, stop_id=None):
     return parse_departures(raw_stop)
 
 
-def format_departure_list(departures, *, min_eta=0, long_eta=-1, directions=None, grouped=False):
+def format_departure_list(departures, *, min_eta=0, long_eta=DEFAULTS["long_eta"], directions=None, grouped=False):
     """
     Filters, formats and groups departures based on arguments passed.
     """
@@ -271,7 +276,7 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
                      help="filter direction of departures")
     par.add_argument('--min-eta', type=int, default=0, metavar="<minutes>",
                      help="minimum ETA of departures to return")
-    par.add_argument('--long-eta', type=int, default=-1, metavar="<minutes>",
+    par.add_argument('--long-eta', type=int, default=DEFAULTS["long_eta"], metavar="<minutes>",
                      help="show departure time when ETA is later than this limit" +
                           "(disable with -1)")
     par.add_argument('--grouped', action="store_true",
