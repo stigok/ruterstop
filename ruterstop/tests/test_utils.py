@@ -24,7 +24,7 @@ class HumanDeltaTestCase(TestCase):
             self.assertEqual(res, expected, "test case #%d" % (i + 1))
 
     def test_default_kwarg_value(self):
-        with patch('ruterstop.datetime') as mock_date:
+        with patch('ruterstop.utils.datetime') as mock_date:
             mock_date.now.return_value = datetime.min
             ruterstop.human_delta(until=datetime.min + timedelta(seconds=120))
             self.assertEqual(mock_date.now.call_count, 1)

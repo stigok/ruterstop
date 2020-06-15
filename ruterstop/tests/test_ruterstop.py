@@ -11,7 +11,7 @@ import ruterstop
 
 class DepartureClassTestCase(TestCase):
     def test_str_representation(self):
-        with patch('ruterstop.datetime') as mock_date:
+        with patch('ruterstop.utils.datetime') as mock_date:
             ref = datetime.min
             mock_date.now.return_value = ref
             in_7_mins = ref + timedelta(minutes=7)

@@ -38,3 +38,40 @@ def timed_cache(*, expires_sec=60, now=datetime.now):
         return wrapper
 
     return decorator
+
+
+def delta(until=None, *, since=None):
+    """
+    Return amount of whole minutes until `until` date occurs, since `since`.
+    Returns -1 if since is later than until.
+    """
+    if not since:
+        since = datetime.now()
+
+    if since > until:
+        return -1
+
+    secs = (until - since).seconds
+    mins = max(0, secs / 60)
+    return int(mins)
+
+
+def human_delta(until=None, *, since=None):
+    """
+    Return a 6 char long string describing minutes left 'until' date occurs.
+    Example output:
+       naa (if delta < 60 seconds)
+     1 min
+     7 min
+    10 min
+    99 min
+    """
+    now_str = "{:>6}".format("naa")
+
+    since = since if since else datetime.now()
+    mins = min(delta(until, since=since), 99)
+
+    if mins < 1:
+        return now_str
+
+    return "{:2} min".format(mins)

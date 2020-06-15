@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 import requests
 import bottle
 
-from ruterstop.utils import norwegian_ascii, timed_cache
+from ruterstop.utils import norwegian_ascii, timed_cache, human_delta
 
 __version__ = "0.3.1"
 
@@ -81,32 +81,6 @@ def default_error_handler(res):
     return "Feil på serveren"
 
 webapp.default_error_handler = default_error_handler
-
-def human_delta(until=None, *, since=None):
-    """
-    Return a 6 char long string describing minutes left 'until' date occurs.
-    Example output:
-       naa (if delta < 60 seconds)
-     1 min
-     7 min
-    10 min
-    99 min
-    """
-    now_str = "{:>6}".format("naa")
-    if not since:
-        since = datetime.now()
-
-    if since > until:
-        return now_str
-
-    secs = (until - since).seconds
-    mins = int(secs / 60) # floor
-    mins = max(0, min(mins, 99)) # between 0 and 99
-
-    if mins < 1:
-        return now_str
-
-    return "{:2} min".format(mins)
 
 
 class Departure(namedtuple("Departure", ["line", "name", "eta", "direction", "realtime"])):
