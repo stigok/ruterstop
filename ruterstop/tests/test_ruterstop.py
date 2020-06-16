@@ -6,12 +6,14 @@ from io import StringIO
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock, patch
 
+from freezegun import freeze_time
+
 import ruterstop
 
 
 class DepartureClassTestCase(TestCase):
     def test_str_representation(self):
-        with patch('ruterstop.datetime') as mock_date:
+        with patch('ruterstop.utils.datetime') as mock_date:
             ref = datetime.min
             mock_date.now.return_value = ref
             in_7_mins = ref + timedelta(minutes=7)
@@ -141,3 +143,29 @@ class RuterstopTestCase(TestCase):
             self.assertEqual(lines[1], "20, 21          2 min")
             self.assertEqual(lines[2], "21 Thre         3 min")
             self.assertEqual(lines[3], "21 Four         4 min")
+
+    @patch("ruterstop.get_realtime_stop", return_value=None)
+    def test_shows_timestamp_for_long_etas(self, _):
+        seed = datetime(2020, 1, 1, 10, 0, 0)
+        with freeze_time(seed):
+            def futr(minutes):
+                return seed + timedelta(minutes=minutes)
+
+            d = ruterstop.Departure
+            deps = [
+                # Shouldn't matter if a departure is realtime or not
+                d("01", "a", futr(60),  "inbound", realtime=True),
+                d("02", "b", futr(120), "inbound", realtime=True),
+                d("03", "c", futr(150), "inbound", realtime=False),
+            ]
+
+            args = " --stop-id=2121 --direction=inbound --long-eta=59".split(' ')
+
+            # Use the fake departure list in this patch
+            with patch("ruterstop.parse_departures", return_value=deps) as mock:
+                with StringIO() as output:
+                    ruterstop.main(args, stdout=output)
+                    lines = output.getvalue().split('\n')
+                self.assertEqual(lines[0], "01 a            11:00")
+                self.assertEqual(lines[1], "02 b            12:00")
+                self.assertEqual(lines[2], "03 c            12:30")
