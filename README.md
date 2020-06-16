@@ -76,17 +76,16 @@ $ ruterstop --server
 Stoppested og filtre velges i adressen til spørringen
 
 ```
-$ curl localhost:4000/6013?direction=outbound
-25 Majorstuen     naa
-31 Snaroeya       naa
+$ curl localhost:4000/6013?direction=outbound&long_eta=10
 31 Fornebu        naa
-31 Snaroeya     8 min
-25 Majorstuen  16 min
-31 Fornebu     18 min
-31 Snaroeya    28 min
-31 Fornebu     38 min
-25 Majorstuen  46 min
-31 Snaroeya    48 min
+31 Snaroeya     5 min
+31 Fornebu      8 min
+31 Fornebu     10 min
+25 Majorstuen   20:21
+31 Snaroeya     20:24
+31 Snaroeya     20:36
+25 Majorstuen   20:36
+31 Fornebu      20:42
 ```
 
 ## Utvikling

@@ -195,6 +195,8 @@ def serve_departures(stop_id):
         kw["min_eta"] = int(q.min_eta)
     if q.grouped:
         kw["grouped"] = True
+    if q.long_eta:
+        kw["long_eta"] = int(q.long_eta)
 
     deps = get_departures(stop_id=stop_id)
     bottle.response.set_header("Content-Type", "text/plain")
