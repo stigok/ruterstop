@@ -20,13 +20,18 @@ import bottle
 
 from ruterstop.utils import delta, human_delta, norwegian_ascii, timed_cache
 
-__version__ = "0.3.1"
+__version__ = "0.4.0"
+
+# Default settings
+DEFAULTS = dict(
+    long_eta=59
+)
 
 ENTUR_CLIENT_ID = __version__
 ENTUR_STOP_PLACE_ENDPOINT = "https://api.entur.io/stop-places/v1/graphql"
 ENTUR_STOP_PLACE_QUERY = """
 {
-  stopPlace(size: 10, query: "%(stop_name)s") {
+  stopPlace(size: 250, query: "%(stop_name)s") {
     id
     topographicPlace {
       name {
@@ -145,10 +150,12 @@ def get_stop_search_result(*, name_search):
 def parse_stops(raw_dict):
     for stop in raw_dict["data"]["stopPlace"]:
         numid = stop["id"].rsplit(":", maxsplit=1).pop()
-        yield StopPlace(numid,
-                stop["name"]["value"],
-                stop["topographicPlace"]["name"]["value"],
-                stop["topographicPlace"]["parentTopographicPlace"]["name"]["value"])
+        yield StopPlace(
+            numid,
+            stop["name"]["value"],
+            stop["topographicPlace"]["name"]["value"],
+            stop["topographicPlace"]["parentTopographicPlace"]["name"]["value"])
+
 
 def parse_departures(raw_dict, *, date_fmt="%Y-%m-%dT%H:%M:%S%z"):
     """
@@ -188,6 +195,8 @@ def serve_departures(stop_id):
         kw["min_eta"] = int(q.min_eta)
     if q.grouped:
         kw["grouped"] = True
+    if q.long_eta:
+        kw["long_eta"] = int(q.long_eta)
 
     deps = get_departures(stop_id=stop_id)
     bottle.response.set_header("Content-Type", "text/plain")
@@ -204,7 +213,7 @@ def get_departures(*, stop_id=None):
     return parse_departures(raw_stop)
 
 
-def format_departure_list(departures, *, min_eta=0, long_eta=-1, directions=None, grouped=False):
+def format_departure_list(departures, *, min_eta=0, long_eta=DEFAULTS["long_eta"], directions=None, grouped=False):
     """
     Filters, formats and groups departures based on arguments passed.
     """
@@ -235,7 +244,7 @@ def format_departure_list(departures, *, min_eta=0, long_eta=-1, directions=None
 
         # Build string output
         newdeps = list()
-        for eta, deps in by_eta.items():
+        for _, deps in by_eta.items():
             # Print single departures normally
             if len(deps) == 1:
                 newdeps.append(deps[0])
@@ -249,7 +258,7 @@ def format_departure_list(departures, *, min_eta=0, long_eta=-1, directions=None
     # Create pretty output
     s = ""
     for dep in deps:
-        if long_eta >= 0 and delta(dep.eta) > long_eta:
+        if 0 < long_eta < delta(dep.eta):
             s += dep.ts_str() + '\n'
         else:
             s += str(dep) + '\n'
@@ -269,7 +278,7 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
                      help="filter direction of departures")
     par.add_argument('--min-eta', type=int, default=0, metavar="<minutes>",
                      help="minimum ETA of departures to return")
-    par.add_argument('--long-eta', type=int, default=-1, metavar="<minutes>",
+    par.add_argument('--long-eta', type=int, default=DEFAULTS["long_eta"], metavar="<minutes>",
                      help="show departure time when ETA is later than this limit" +
                           "(disable with -1)")
     par.add_argument('--grouped', action="store_true",

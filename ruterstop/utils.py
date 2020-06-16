@@ -43,7 +43,7 @@ def timed_cache(*, expires_sec=60, now=datetime.now):
 def delta(until=None, *, since=None):
     """
     Return amount of whole minutes until `until` date occurs, since `since`.
-    Returns -1 if since is later than until.
+    Returns -1 if `since` is later than `until`.
     """
     if not since:
         since = datetime.now()
