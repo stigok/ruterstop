@@ -1,6 +1,6 @@
 # ruterstop
 
-Et program som viser sanntidsinformasjon for stoppesteder i Oslo og Akershus.
+Et program som viser sanntidsinformasjon for stoppesteder i Oslo og deler av Viken.
 
 - Lister 20 av de neste avgangene
 - Bruk filtre som `--direction`, `--grouped` og `--min-eta`

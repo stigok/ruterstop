@@ -17,7 +17,7 @@ def readme():
 setup(
     name="ruterstop",
     description="Et program som viser sanntidsinformasjon for stoppesteder i " +
-                "Oslo og Akershus.",
+                "Oslo og deler av Viken.",
     version=version,
     long_description=readme(),
     long_description_content_type="text/markdown",
