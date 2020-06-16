@@ -31,7 +31,7 @@ ENTUR_CLIENT_ID = __version__
 ENTUR_STOP_PLACE_ENDPOINT = "https://api.entur.io/stop-places/v1/graphql"
 ENTUR_STOP_PLACE_QUERY = """
 {
-  stopPlace(size: 10, query: "%(stop_name)s") {
+  stopPlace(size: 250, query: "%(stop_name)s") {
     id
     topographicPlace {
       name {
