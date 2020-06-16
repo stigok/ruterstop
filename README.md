@@ -6,6 +6,7 @@ Et program som viser sanntidsinformasjon for stoppesteder i Oslo og Akershus.
 - Bruk filtre som `--direction`, `--grouped` og `--min-eta`
 - Start en HTTP server med `--server`
 - Søk etter stoppesteder med `--search-stop`
+- Sett når du ønsker å se klokkeslett med `--long-eta`
 - Bruk `--help` for full hjelp
 
 Innspill, tanker og feilmeldinger mottas med glede!
