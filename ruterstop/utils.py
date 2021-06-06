@@ -28,9 +28,11 @@ def timed_cache(*, expires_sec=60, now=datetime.now):
         @wraps(func)
         def wrapper(*_args, **_kwargs):
             time = now()
-            key = _make_key(_args, _kwargs, False) # pylint: disable=protected-access
+            key = _make_key(_args, _kwargs, False)  # pylint: disable=protected-access
 
-            if key not in cache or time > cache[key]["timestamp"] + timedelta(seconds=expires_sec):
+            if key not in cache or time > cache[key]["timestamp"] + timedelta(
+                seconds=expires_sec
+            ):
                 cache[key] = dict(value=func(*_args, **_kwargs), timestamp=time)
 
             return cache[key]["value"]
