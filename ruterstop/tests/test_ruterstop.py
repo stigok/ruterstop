@@ -13,18 +13,22 @@ import ruterstop
 
 class DepartureClassTestCase(TestCase):
     def test_str_representation(self):
-        with patch('ruterstop.utils.datetime') as mock_date:
+        with patch("ruterstop.utils.datetime") as mock_date:
             ref = datetime.min
             mock_date.now.return_value = ref
             in_7_mins = ref + timedelta(minutes=7)
             in_77_mins = ref + timedelta(minutes=77)
 
             # Test valid representation
-            d = ruterstop.Departure(line=21, name="twentyone", eta=in_7_mins, direction="o")
+            d = ruterstop.Departure(
+                line=21, name="twentyone", eta=in_7_mins, direction="o"
+            )
             self.assertEqual(str(d), "21 twentyone    7 min")
 
             # Test long name trimming
-            d = ruterstop.Departure(line=21, name="longname" * 3, eta=in_77_mins, direction="o")
+            d = ruterstop.Departure(
+                line=21, name="longname" * 3, eta=in_77_mins, direction="o"
+            )
             self.assertEqual(str(d), "21 longnamelon 77 min")
 
 
@@ -36,7 +40,7 @@ class StopPlaceTestCase(TestCase):
             self.raw_stop_data = json.load(fp)
 
     def test_get_stop_search_result(self):
-        with patch('requests.post') as mock:
+        with patch("requests.post") as mock:
             ruterstop.get_stop_search_result(name_search="foobar")
             self.assertEqual(mock.call_count, 1)
             _, kwargs = mock.call_args
@@ -58,11 +62,11 @@ class RuterstopTestCase(TestCase):
     def setUp(self):
         # Load test data for the external API
         p = os.path.realpath(os.path.dirname(__file__))
-        with open(os.path.join(p, 'test_data.json')) as fp:
+        with open(os.path.join(p, "test_data.json")) as fp:
             self.raw_departure_data = json.load(fp)
 
     def test_get_realtime_stop(self):
-        with patch('requests.post') as mock:
+        with patch("requests.post") as mock:
             ruterstop.get_realtime_stop(stop_id=1337)
             self.assertEqual(mock.call_count, 1)
             _, kwargs = mock.call_args
@@ -101,13 +105,13 @@ class RuterstopTestCase(TestCase):
         deps.append(d("03", "c", past3min, "inbound", realtime=True))
         deps.append(d("51", "d", futr1min, "inbound", realtime=True))
 
-        args = " --stop-id=2121 --direction=inbound --grouped".split(' ')
+        args = " --stop-id=2121 --direction=inbound --grouped".split(" ")
 
         # Use the fake departure list in this patch
         with patch("ruterstop.parse_departures", return_value=deps) as mock:
             output = StringIO()
             ruterstop.main(args, stdout=output)
-            lines = output.getvalue().split('\n')
+            lines = output.getvalue().split("\n")
             output.close()
             self.assertEqual(lines[0], "01, 02, 03        naa")
             self.assertEqual(lines[1], "51 d            1 min")
@@ -135,9 +139,9 @@ class RuterstopTestCase(TestCase):
         # Use the fake departure list in this patch
         with patch("ruterstop.parse_departures", return_value=deps) as mock:
             output = StringIO()
-            args = " --stop-id=2121 --direction=inbound --grouped".split(' ')
+            args = " --stop-id=2121 --direction=inbound --grouped".split(" ")
             ruterstop.main(args, stdout=output)
-            lines = output.getvalue().split('\n')
+            lines = output.getvalue().split("\n")
             output.close()
             self.assertEqual(lines[0], "01, 10, 11, 12    naa")
             self.assertEqual(lines[1], "20, 21          2 min")
@@ -148,24 +152,25 @@ class RuterstopTestCase(TestCase):
     def test_shows_timestamp_for_long_etas(self, _):
         seed = datetime(2020, 1, 1, 10, 0, 0)
         with freeze_time(seed):
+
             def futr(minutes):
                 return seed + timedelta(minutes=minutes)
 
             d = ruterstop.Departure
             deps = [
                 # Shouldn't matter if a departure is realtime or not
-                d("01", "a", futr(60),  "inbound", realtime=True),
+                d("01", "a", futr(60), "inbound", realtime=True),
                 d("02", "b", futr(120), "inbound", realtime=True),
                 d("03", "c", futr(150), "inbound", realtime=False),
             ]
 
-            args = " --stop-id=2121 --direction=inbound --long-eta=59".split(' ')
+            args = " --stop-id=2121 --direction=inbound --long-eta=59".split(" ")
 
             # Use the fake departure list in this patch
             with patch("ruterstop.parse_departures", return_value=deps) as mock:
                 with StringIO() as output:
                     ruterstop.main(args, stdout=output)
-                    lines = output.getvalue().split('\n')
+                    lines = output.getvalue().split("\n")
                 self.assertEqual(lines[0], "01 a            11:00")
                 self.assertEqual(lines[1], "02 b            12:00")
                 self.assertEqual(lines[2], "03 c            12:30")

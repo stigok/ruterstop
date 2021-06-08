@@ -49,6 +49,6 @@ class WebAppTestCase(TestCase):
     def test_calls_api_with_querystring_params(self, get_mock, format_mock):
         self.app.get("/1234?direction=inbound&min_eta=5&bogusargs=1337")
         get_mock.assert_called_once_with(stop_id=1234)
-        format_mock.assert_called_once_with(dict(a="foo"),
-                                            directions="inbound",
-                                            min_eta=5)
+        format_mock.assert_called_once_with(
+            dict(a="foo"), directions="inbound", min_eta=5
+        )

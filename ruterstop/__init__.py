@@ -20,12 +20,10 @@ import bottle
 
 from ruterstop.utils import delta, human_delta, norwegian_ascii, timed_cache
 
-__version__ = "0.4.0"
+__version__ = "0.4.2"
 
 # Default settings
-DEFAULTS = dict(
-    long_eta=59
-)
+DEFAULTS = dict(long_eta=59)
 
 ENTUR_CLIENT_ID = __version__
 ENTUR_STOP_PLACE_ENDPOINT = "https://api.entur.io/stop-places/v1/graphql"
@@ -74,22 +72,29 @@ ENTUR_GRAPHQL_QUERY = """
 webapp = bottle.Bottle()
 log = logging.getLogger("ruterstop")
 
+
 def not_found_error_handler(res):
     res.set_header("Content-Type", "text/plain")
     return "Ugyldig stoppested"
 
+
 webapp.error(code=404)(not_found_error_handler)
+
 
 def default_error_handler(res):
     res.set_header("Content-Type", "text/plain")
     log.error(res.traceback)
     return "Feil på serveren"
 
+
 webapp.default_error_handler = default_error_handler
 
 
-class Departure(namedtuple("Departure", ["line", "name", "eta", "direction", "realtime"])):
+class Departure(
+    namedtuple("Departure", ["line", "name", "eta", "direction", "realtime"])
+):
     """Represents a transport departure"""
+
     def __str__(self):
         name = str(self.line)
         if self.name:
@@ -119,11 +124,15 @@ def get_realtime_stop(*, stop_id=None):
     headers = {
         "Accept": "application/json",
         "ET-Client-Name": "ruterstop - stigok/ruterstop",
-        "ET-Client-Id": ENTUR_CLIENT_ID
+        "ET-Client-Id": ENTUR_CLIENT_ID,
     }
     qry = ENTUR_GRAPHQL_QUERY % dict(stop_id=stop_id)
-    res = requests.post(ENTUR_GRAPHQL_ENDPOINT, headers=headers, timeout=5,
-                        json=dict(query=qry, variables={}))
+    res = requests.post(
+        ENTUR_GRAPHQL_ENDPOINT,
+        headers=headers,
+        timeout=5,
+        json=dict(query=qry, variables={}),
+    )
     res.raise_for_status()
     return res.json()
 
@@ -138,11 +147,15 @@ def get_stop_search_result(*, name_search):
     headers = {
         "Accept": "application/json",
         "ET-Client-Name": "ruterstop - stigok/ruterstop",
-        "ET-Client-Id": ENTUR_CLIENT_ID
+        "ET-Client-Id": ENTUR_CLIENT_ID,
     }
     qry = ENTUR_STOP_PLACE_QUERY % dict(stop_name=name_search)
-    res = requests.post(ENTUR_STOP_PLACE_ENDPOINT, headers=headers, timeout=5,
-                        json=dict(query=qry, variables={}))
+    res = requests.post(
+        ENTUR_STOP_PLACE_ENDPOINT,
+        headers=headers,
+        timeout=5,
+        json=dict(query=qry, variables={}),
+    )
     res.raise_for_status()
     return res.json()
 
@@ -154,7 +167,8 @@ def parse_stops(raw_dict):
             numid,
             stop["name"]["value"],
             stop["topographicPlace"]["name"]["value"],
-            stop["topographicPlace"]["parentTopographicPlace"]["name"]["value"])
+            stop["topographicPlace"]["parentTopographicPlace"]["name"]["value"],
+        )
 
 
 def parse_departures(raw_dict, *, date_fmt="%Y-%m-%dT%H:%M:%S%z"):
@@ -169,8 +183,9 @@ def parse_departures(raw_dict, *, date_fmt="%Y-%m-%dT%H:%M:%S%z"):
     """
     if raw_dict["data"]["stopPlace"]:
         for dep in raw_dict["data"]["stopPlace"]["estimatedCalls"]:
-            eta = datetime.strptime(dep["expectedArrivalTime"],
-                                    date_fmt).replace(tzinfo=None)
+            eta = datetime.strptime(dep["expectedArrivalTime"], date_fmt).replace(
+                tzinfo=None
+            )
             yield Departure(
                 line=dep["serviceJourney"]["line"]["publicCode"],
                 name=norwegian_ascii(dep["destinationDisplay"]["frontText"]),
@@ -213,7 +228,14 @@ def get_departures(*, stop_id=None):
     return parse_departures(raw_stop)
 
 
-def format_departure_list(departures, *, min_eta=0, long_eta=DEFAULTS["long_eta"], directions=None, grouped=False):
+def format_departure_list(
+    departures,
+    *,
+    min_eta=0,
+    long_eta=DEFAULTS["long_eta"],
+    directions=None,
+    grouped=False
+):
     """
     Filters, formats and groups departures based on arguments passed.
     """
@@ -225,8 +247,9 @@ def format_departure_list(departures, *, min_eta=0, long_eta=DEFAULTS["long_eta"
 
     # Filter departures with minimum time treshold
     time_treshold = datetime.now() + timedelta(minutes=min_eta)
-    deps = filter(lambda d: d.eta >= time_treshold or
-                            (min_eta == 0 and d.realtime), deps)
+    deps = filter(
+        lambda d: d.eta >= time_treshold or (min_eta == 0 and d.realtime), deps
+    )
 
     # Group departures with same departure time
     # TODO: The check for whether directions has filter might need more work
@@ -250,18 +273,23 @@ def format_departure_list(departures, *, min_eta=0, long_eta=DEFAULTS["long_eta"
                 newdeps.append(deps[0])
                 continue
 
-            newdeps.append(Departure(line=", ".join([d.line for d in deps]),
-                                     name="", eta=deps[0].eta,
-                                     direction=deps[0].direction))
+            newdeps.append(
+                Departure(
+                    line=", ".join([d.line for d in deps]),
+                    name="",
+                    eta=deps[0].eta,
+                    direction=deps[0].direction,
+                )
+            )
         deps = newdeps
 
     # Create pretty output
     s = ""
     for dep in deps:
         if 0 < long_eta < delta(dep.eta):
-            s += dep.ts_str() + '\n'
+            s += dep.ts_str() + "\n"
         else:
-            s += str(dep) + '\n'
+            s += str(dep) + "\n"
     return s
 
 
@@ -269,31 +297,55 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
     """Main function for CLI usage"""
     # Parse command line arguments
     par = argparse.ArgumentParser(prog="ruterstop")
-    par.add_argument('--search-stop', type=str, metavar="<name>",
-                     help="search for a stop by name")
-    par.add_argument('--stop-id', metavar="<id>",
-                     help="use --search-stop or official website to find stops " +
-                          "https://stoppested.entur.org (guest:guest)")
-    par.add_argument('--direction', choices=["inbound", "outbound"],
-                     help="filter direction of departures")
-    par.add_argument('--min-eta', type=int, default=0, metavar="<minutes>",
-                     help="minimum ETA of departures to return")
-    par.add_argument('--long-eta', type=int, default=DEFAULTS["long_eta"], metavar="<minutes>",
-                     help="show departure time when ETA is later than this limit" +
-                          "(disable with -1)")
-    par.add_argument('--grouped', action="store_true",
-                     help="group departures with same ETA together " +
-                          "when --direction is also specified.")
-    par.add_argument('--server', action="store_true",
-                     help="start a HTTP server")
-    par.add_argument('--host', type=str, default="0.0.0.0", metavar="<ip|hostname>",
-                     help="HTTP server hostname")
-    par.add_argument('--port', type=int, default=4000, metavar="<port>",
-                     help="HTTP server listen port")
-    par.add_argument('--debug', action="store_true",
-                     help="enable debug logging")
-    par.add_argument('--version', action="store_true",
-                     help="show version information")
+    par.add_argument(
+        "--search-stop", type=str, metavar="<name>", help="search for a stop by name"
+    )
+    par.add_argument(
+        "--stop-id",
+        metavar="<id>",
+        help="use --search-stop or official website to find stops https://stoppested.entur.org (guest:guest)",
+    )
+    par.add_argument(
+        "--direction",
+        choices=["inbound", "outbound"],
+        help="filter direction of departures",
+    )
+    par.add_argument(
+        "--min-eta",
+        type=int,
+        default=0,
+        metavar="<minutes>",
+        help="minimum ETA of departures to return",
+    )
+    par.add_argument(
+        "--long-eta",
+        type=int,
+        default=DEFAULTS["long_eta"],
+        metavar="<minutes>",
+        help="show departure time when ETA is later than this limit (disable with -1)",
+    )
+    par.add_argument(
+        "--grouped",
+        action="store_true",
+        help="group departures with same ETA together when --direction is also specified.",
+    )
+    par.add_argument("--server", action="store_true", help="start a HTTP server")
+    par.add_argument(
+        "--host",
+        type=str,
+        default="0.0.0.0",
+        metavar="<ip|hostname>",
+        help="HTTP server hostname",
+    )
+    par.add_argument(
+        "--port",
+        type=int,
+        default=4000,
+        metavar="<port>",
+        help="HTTP server listen port",
+    )
+    par.add_argument("--debug", action="store_true", help="enable debug logging")
+    par.add_argument("--version", action="store_true", help="show version information")
 
     args = par.parse_args(argv[1:])
 
@@ -328,11 +380,13 @@ def main(argv=sys.argv, *, stdout=sys.stdout):
 
         # Just print stop information
         deps = get_departures(stop_id=args.stop_id)
-        formatted = format_departure_list(deps,
-                                          min_eta=args.min_eta,
-                                          long_eta=args.long_eta,
-                                          directions=directions,
-                                          grouped=args.grouped)
+        formatted = format_departure_list(
+            deps,
+            min_eta=args.min_eta,
+            long_eta=args.long_eta,
+            directions=directions,
+            grouped=args.grouped,
+        )
 
         print(formatted, file=stdout)
 
