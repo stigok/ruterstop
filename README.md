@@ -107,6 +107,15 @@ $ make matrix
 
 Se Makefile for detaljer
 
+### Tag ny versjon
+
+```
+$ ./.deploy/bump_version.py
+```
+
+Verktøyet hjelper til å huske å bytte versjonsnummer før tagging og sjekke
+at man er på riktig branch.
+
 ## Motivasjon
 
 Jeg vil se avganger fra mitt nærmeste stoppested mens jeg sitter ved
