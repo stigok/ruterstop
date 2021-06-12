@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "ruterstop"
 description = "Et program som viser sanntidsinformasjon for stoppesteder i Oslo og deler av Viken."
-version = "0.4.2"
+version = "0.5.0"
 authors = ["Stig Otnes Kolstad <stig@stigok.com>"]
 readme = "README.md"
 homepage = "https://github.com/stigok/ruterstop"
