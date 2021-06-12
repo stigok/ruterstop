@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Build and run a Docker image based on a specific Python version
 set -eu
 
