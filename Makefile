@@ -1,6 +1,6 @@
 .PHONY: test
 test:
-	python3 setup.py test
+	poetry run python -m unittest
 
 .PHONY: matrix-unit-tests
 matrix-unit-tests:

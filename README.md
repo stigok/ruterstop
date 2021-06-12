@@ -28,14 +28,8 @@ $ pip install ruterstop
 Last ned kildekoden og installer programmet med avhengigheter fra kildekodemappen
 
 ```
-$ pip install .
-```
-
-**eller** installer avhengighetene og kjør programmet uten å installere
-
-```
-$ pip install -r requirements.txt
-$ python ruterstop/
+$ pip install poetry
+$ poetry build
 ```
 
 ## Brukerveiledning
@@ -93,10 +87,8 @@ $ curl localhost:4000/6013?direction=outbound&long_eta=10
 ### Kjør tester
 
 ```
-$ python -m venv venv
-$ source venv/bin/activate
-$ pip install -r requirements.txt
-$ python setup.py test
+$ poetry install
+$ poetry run python -m unittest
 ```
 
 ### Kjør multi-versjon tester i Docker
