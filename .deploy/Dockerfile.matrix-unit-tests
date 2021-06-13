@@ -1,27 +1,30 @@
-ARG PYVER
-FROM alpine:3.10 AS timezone
-RUN apk update && \
-    apk add --no-cache tzdata
+ARG PYTHON_VERSION
 
-FROM python:${PYVER}-alpine3.10
+# Base
+FROM python:${PYTHON_VERSION}-slim AS base
+ENV PYTHONFAULTHANDLER=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONHASHSEED=random \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_DEFAULT_TIMEOUT=10
+WORKDIR /opt/app
 
-RUN apk update && \
-    apk add --no-cache ca-certificates
-RUN pip install --upgrade pip
+# Build
+FROM base as build
 
-# Set timezone to make tests show correct times
-COPY --from=timezone /usr/share/zoneinfo/Europe/Brussels /etc/localtime
-RUN echo "Europe/Brussels" > /etc/timezone
+ARG POETRY_VERSION
+ENV POETRY_VERSION=${POETRY_VERSION:-1.1.5}
+RUN pip install "poetry==$POETRY_VERSION"
 
-WORKDIR /usr/src/app
+COPY poetry.lock pyproject.toml ./
+RUN poetry config virtualenvs.in-project true \
+ && poetry install --no-interaction --no-ansi --no-root
 
-# Dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# The application itself
+# Runtime
+FROM base
+ENV PYTHONPATH=/opt/app/.venv \
+    PATH="/opt/app/.venv/bin:${PATH}" \
+    TZ=Europe/Oslo
 COPY . .
-RUN pip install --no-cache-dir .
-
-ENV PYTHONUNBUFFERED=1
-CMD [ "ruterstop", "--stop-id=6013" ]
+COPY --from=build /opt/app/.venv ./.venv
+ENTRYPOINT ["python", "-m", "ruterstop"]
