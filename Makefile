@@ -7,6 +7,7 @@ matrix-unit-tests:
 	poetry run .deploy/run_tests.py 3.6
 	poetry run .deploy/run_tests.py 3.7
 	poetry run .deploy/run_tests.py 3.8
+	poetry run .deploy/run_tests.py 3.9
 
 .PHONY: matrix
 matrix: matrix-unit-tests
