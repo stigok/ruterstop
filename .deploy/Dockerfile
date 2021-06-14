@@ -27,4 +27,4 @@ ENV PYTHONPATH=/opt/app/.venv \
     TZ=Europe/Oslo
 COPY . .
 COPY --from=build /opt/app/.venv ./.venv
-ENTRYPOINT ["python", "-m", "ruterstop"]
+ENTRYPOINT ["python", "-m"]

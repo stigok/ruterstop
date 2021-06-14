@@ -3,7 +3,7 @@ name: Python tests
 on: [push]
 
 jobs:
-  test:
+  unittests:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -24,3 +24,21 @@ jobs:
     - name: Run tests
       run: |
         poetry run python -m unittest
+
+  livetest:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
+    - name: Run tests in Docker for Python ${{ matrix.python-version }}
+      run: |
+        ./.deploy/run_tests.py ${{ matrix.python-version }}

@@ -1,49 +1,49 @@
 #!/usr/bin/env python3
-from subprocess import run, PIPE
-from sys import argv
+from subprocess import run
+from sys import argv, exit
 
-# What command to run in the tests
-cmd = argv[1:] or ["--stop-id=6013"]
+PYVER = argv[1]
+IMAGE = f"ruterstop:python{PYVER}"
 
-test_results = dict()
+print("Building", IMAGE)
+run(
+    [
+        "docker",
+        "build",
+        "--network=host",
+        "--file=.deploy/Dockerfile",
+        f"--build-arg=PYTHON_VERSION={PYVER}",
+        f"--build-arg=POETRY_VERSION=1.1.5",
+        f"--tag=ruterstop:python{PYVER}",
+        ".",
+    ],
+    check=True,
+)
 
-for pyver in ["3.6", "3.7", "3.8"]:
-    image = f"ruterstop:python{pyver}"
+print("Running unit-tests", IMAGE)
+run(
+    [
+        "docker",
+        "run",
+        "--network=host",
+        "--rm",
+        IMAGE,
+    ]
+    + ["unittest"],
+    check=True,
+)
 
-    print("Building...", image)
-    try:
-        run(
-            [
-                "docker",
-                "build",
-                "--network=host",
-                "--file=.deploy/Dockerfile.matrix-unit-tests",
-                f"--build-arg=PYTHON_VERSION={pyver}",
-                f"--build-arg=POETRY_VERSION=1.1.5",
-                f"--tag=ruterstop:python{pyver}",
-                ".",
-            ],
-            text=True,
-            check=True,
-        )
-        test_results[pyver] = "success"
-    except CalledProcessError as ex:
-        print(ex)
-        test_results[pyver] = "failed"
+print("Running livetest", IMAGE)
+run(
+    [
+        "docker",
+        "run",
+        "--network=host",
+        "--rm",
+        IMAGE,
+    ]
+    + ["ruterstop", "--stop-id=6013"],
+    check=True,
+)
 
-    print("Running", image, cmd)
-    run(
-        [
-            "docker",
-            "run",
-            "--network=host",
-            "--rm",
-            image,
-        ]
-        + cmd
-    )
-
-print()
-print("Results:")
-for pyver, result in test_results.items():
-    print("\t", pyver, result)
+print("Success!")
