@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "ruterstop"
+description = "Et program som viser sanntidsinformasjon for stoppesteder i Oslo og deler av Viken."
+version = "0.5.0"
+authors = ["Stig Otnes Kolstad <stig@stigok.com>"]
+readme = "README.md"
+homepage = "https://github.com/stigok/ruterstop"
+documentation = "http://github.com/stigok/ruterstop"
+repository = "https://github.com/stigok/ruterstop"
+license = "MIT"
+keywords = ["ruter", "entur", "ruter-api", "kollektivtransport", "oslo"]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3 :: Only",
+]
+packages = [
+  { include = "ruterstop" },
+]
+
+[tool.poetry.scripts]
+ruterstop = "ruterstop:main"
+
+[tool.poetry.dependencies]
+python = "^3.5"
+requests = "^2.25.1"
+bottle = "^0.12.19"
+toml = "^0.10.2"
+
+[tool.poetry.dev-dependencies]
+coverage = "^5.5"
+freezegun = "^1.1.0"
+WebTest = "^2.0.35"
+
+[build-system]
+requires = ["poetry-core>=1.1.5"]
+build-backend = "poetry.core.masonry.api"

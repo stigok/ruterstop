@@ -12,7 +12,7 @@ import logging
 import os
 import socket
 import sys
-from collections import defaultdict, namedtuple, OrderedDict
+from collections import defaultdict, namedtuple
 from datetime import datetime, timedelta
 
 import requests
@@ -20,7 +20,7 @@ import bottle
 
 from ruterstop.utils import delta, human_delta, norwegian_ascii, timed_cache
 
-__version__ = "0.4.2"
+__version__ = "0.5.0"
 
 # Default settings
 DEFAULTS = dict(long_eta=59)
@@ -255,15 +255,9 @@ def format_departure_list(
     # TODO: The check for whether directions has filter might need more work
     if grouped and dirs:
         # Group by ETA value
-        # NOTE: working around defaultdict(list) as we can't trust insertion
-        # order of the items in Python 3.5
-        by_eta = OrderedDict()
+        by_eta = defaultdict(list)
         for dep in deps:
-            k = human_delta(dep.eta)
-            if not k in by_eta.keys():
-                by_eta[k] = [dep]
-            else:
-                by_eta[k].append(dep)
+            by_eta[human_delta(dep.eta)].append(dep)
 
         # Build string output
         newdeps = list()
