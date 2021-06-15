@@ -20,7 +20,7 @@ import bottle
 
 from ruterstop.utils import delta, human_delta, norwegian_ascii, timed_cache
 
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 
 # Default settings
 DEFAULTS = dict(long_eta=59)
