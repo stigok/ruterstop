@@ -88,8 +88,8 @@ if initfile_ver != new_ver:
 branch = run(
     ["git", "branch", "--show-current"], text=True, capture_output=True
 ).stdout.strip()
-if branch != "master":
-    panic(f"Not on master branch ({branch})")
+if branch != "main":
+    panic(f"Not on main branch ({branch})")
 
 #
 # Tag with next version
