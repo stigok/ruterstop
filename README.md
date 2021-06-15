@@ -15,7 +15,7 @@ Innspill, tanker og feilmeldinger mottas med glede!
 
 ## Installasjon
 
-Trenger Python >=3.5 for å kjøre.
+Trenger Python >=3.6 for å kjøre.
 
 ### Installer fra PyPi
 
