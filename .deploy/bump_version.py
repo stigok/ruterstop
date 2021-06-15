@@ -95,5 +95,4 @@ if branch != "main":
 # Tag with next version
 #
 if input(f"Tag v{new_ver}? y/N").lower() == "y":
-    run(cmd)
-cmd = ["git", "tag", "-a", f"v{new_ver}", "-m", f"{new_ver}"]
+    run(["git", "tag", "-a", f"v{new_ver}", "-m", f"{new_ver}"])
